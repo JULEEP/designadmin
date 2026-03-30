@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { FaChevronDown } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { FaChevronDown, FaTimes } from "react-icons/fa";
+import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
 
-const Sidebar = ({ isCollapsed, isMobile }) => {
+const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
   const [openDropdown, setOpenDropdown] = useState(null);
+  const location = useLocation();
 
   const toggleDropdown = (name) => {
     setOpenDropdown(openDropdown === name ? null : name);
@@ -12,16 +13,9 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
 
   const handleLogout = async () => {
     try {
-      // Get API URL based on environment
       const apiUrl = process.env.REACT_APP_API_URL || "http://31.97.206.144:4061";
-
-      // Make the POST request to the logout API
       await axios.post(`${apiUrl}/api/admin/logout`, {}, { withCredentials: true });
-
-      // Remove the token from localStorage
       localStorage.removeItem("authToken");
-
-      // Alert the user and redirect to login
       alert("Logout successful");
       window.location.href = "/";
     } catch (error) {
@@ -30,24 +24,31 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
     }
   };
 
+  const isActive = (path) => {
+    if (!path) return false;
+    return location.pathname === path;
+  };
+
+  const isDropdownActive = (dropdown) => {
+    if (!dropdown) return false;
+    return dropdown.some(item => location.pathname === item.path);
+  };
+
   const elements = [
     {
-      icon: <i className="ri-dashboard-fill text-white"></i>,
+      icon: <i className="ri-dashboard-line text-xl"></i>,
       name: "Dashboard",
       path: "/dashboard",
     },
     {
-      icon: <i className="ri-user-fill text-white"></i>,
+      icon: <i className="ri-group-line text-xl"></i>,
       name: "Users",
       dropdown: [
         { name: "User List", path: "/users" },
-        { name: "Active Users", path: "/active-users" },
-        { name: "New Users", path: "/new-users" },
-        { name: "User Reports", path: "/user-reports" },
       ],
     },
     {
-      icon: <i className="ri-calendar-check-fill text-white"></i>,
+      icon: <i className="ri-calendar-check-line text-xl"></i>,
       name: "Bookings",
       dropdown: [
         { name: "All Bookings", path: "/bookings" },
@@ -57,17 +58,15 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
       ],
     },
     {
-      icon: <i className="ri-file-text-fill text-white"></i>,
+      icon: <i className="ri-file-text-line text-xl"></i>,
       name: "Bill Books",
       dropdown: [
         { name: "Create Bill Book", path: "/create-billbook" },
         { name: "Bill Book List", path: "/billbooks" },
-        { name: "Bill Book Types", path: "/billbook-types" },
-        { name: "Bill Book Orders", path: "/billbook-orders" },
       ],
     },
     {
-      icon: <i className="ri-id-card-fill text-white"></i>,
+      icon: <i className="ri-id-card-line text-xl"></i>,
       name: "Visiting Cards",
       dropdown: [
         { name: "Create Visiting Card", path: "/create-visitingcard" },
@@ -77,7 +76,15 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
       ],
     },
     {
-      icon: <i className="ri-image-fill text-white"></i>,
+      icon: <i className="ri-stethoscope-line text-xl"></i>,
+      name: "Doctor Prescription",
+      dropdown: [
+        { name: "Create Prescription", path: "/create-prescription" },
+        { name: "All Prescriptions", path: "/prescriptions" },
+      ],
+    },
+    {
+      icon: <i className="ri-image-line text-xl"></i>,
       name: "Banners",
       dropdown: [
         { name: "Create Banner", path: "/create-banner" },
@@ -86,7 +93,7 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
       ],
     },
     {
-      icon: <i className="ri-settings-3-fill text-white"></i>,
+      icon: <i className="ri-settings-3-line text-xl"></i>,
       name: "Settings",
       dropdown: [
         { name: "General Settings", path: "/settings" },
@@ -99,88 +106,255 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
       ],
     },
     {
-      icon: <i className="ri-logout-box-fill text-white"></i>,
+      icon: <i className="ri-logout-box-r-line text-xl"></i>,
       name: "Logout",
       action: handleLogout,
     },
   ];
 
   return (
-    <div
-      className={`transition-all duration-300 ${isMobile ? (isCollapsed ? "w-0" : "w-64") : isCollapsed ? "w-16" : "w-64"} h-screen overflow-y-scroll no-scrollbar flex flex-col bg-gradient-to-b from-gray-800 to-blue-900`}
-    >
-      {/* Sidebar Header */}
-      <div className="sticky top-0 p-4 font-bold text-white flex justify-center text-xl bg-gradient-to-r from-blue-900 to-indigo-800 border-b border-blue-700">
-        <div className="flex items-center space-x-2">
-          <i className="ri-admin-fill text-2xl"></i>
-          {(!isCollapsed || isMobile) && <span>Admin Portal</span>}
-        </div>
-      </div>
+    <>
+      {/* Mobile Overlay */}
+      {isMobile && !isCollapsed && (
+        <div 
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+          onClick={onToggle}
+        />
+      )}
 
-      {/* Navigation Menu */}
-      <nav className={`flex flex-col ${isCollapsed && "items-center"} space-y-1 mt-4 px-2`}>
-        {elements.map((item, idx) => (
-          <div key={idx} className="mb-1">
-            {item.dropdown ? (
-              <>
-                <div
-                  className={`flex items-center py-3 px-4 font-semibold text-sm text-white mx-2 rounded-lg cursor-pointer hover:bg-blue-700/50 transition-colors duration-200 ${openDropdown === item.name ? 'bg-blue-700/30' : ''}`}
-                  onClick={() => toggleDropdown(item.name)}
-                >
-                  <span className="text-xl">{item.icon}</span>
-                  {(!isCollapsed || isMobile) && (
-                    <>
-                      <span className="ml-4">{item.name}</span>
-                      <FaChevronDown
-                        className={`ml-auto text-xs transition-transform duration-200 ${openDropdown === item.name ? "rotate-180" : "rotate-0"}`}
-                      />
-                    </>
-                  )}
-                </div>
-                {openDropdown === item.name && (!isCollapsed || isMobile) && (
-                  <div className="ml-6 mr-2 mt-1 mb-2 p-2 bg-blue-800/30 rounded-lg">
-                    {item.dropdown.map((subItem, subIdx) => (
-                      <Link
-                        key={subIdx}
-                        to={subItem.path}
-                        className="flex items-center space-x-2 py-2.5 px-3 text-sm font-medium text-gray-200 hover:text-white hover:bg-blue-700/40 rounded-md transition-colors duration-150"
-                        onClick={() => setOpenDropdown(null)}
-                      >
-                        <i className="ri-arrow-right-s-line text-blue-300"></i>
-                        <span>{subItem.name}</span>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <Link
-                to={item.path}
-                className={`flex items-center py-3 px-4 font-semibold text-sm text-white mx-2 rounded-lg hover:bg-blue-700/50 transition-colors duration-200 ${item.name === 'Logout' ? 'hover:bg-red-700/50 mt-8 border-t border-blue-700 pt-4' : ''}`}
-                onClick={item.action ? item.action : null}
-              >
-                <span className="text-xl">{item.icon}</span>
-                {(!isCollapsed || isMobile) && (
-                  <span className={`ml-4 ${item.name === 'Logout' ? 'text-red-200' : ''}`}>
-                    {item.name}
-                  </span>
-                )}
-              </Link>
+      <div
+        className={`fixed md:relative z-50 transition-all duration-300 ease-in-out ${
+          isMobile 
+            ? isCollapsed 
+              ? "-translate-x-full" 
+              : "translate-x-0"
+            : isCollapsed 
+              ? "w-20" 
+              : "w-72"
+        } h-screen flex flex-col`}
+        style={{
+          background: "linear-gradient(135deg, #e6f0ff 0%, #d4e4ff 100%)",
+          boxShadow: "0 20px 35px -10px rgba(59, 130, 246, 0.2)",
+        }}
+      >
+        {/* Sidebar Header */}
+        <div className="sticky top-0 py-6 px-4 flex items-center justify-between border-b border-blue-200/50 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className={`flex items-center ${(!isCollapsed || isMobile) ? 'space-x-3' : 'justify-center w-full'}`}>
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-xl blur-md opacity-40" />
+              <div className="relative w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg">
+                <i className="ri-admin-line text-white text-xl"></i>
+              </div>
+            </div>
+            {(!isCollapsed || isMobile) && (
+              <div>
+                <h1 className="text-blue-800 font-bold text-lg tracking-wide">
+                  Admin Portal
+                </h1>
+                <p className="text-[10px] text-blue-500/70">Liquid Admin</p>
+              </div>
             )}
           </div>
-        ))}
-      </nav>
-
-      {/* Sidebar Footer - Only visible when expanded */}
-      {(!isCollapsed || isMobile) && (
-        <div className="mt-auto p-4 border-t border-blue-700">
-          <div className="text-center">
-            <div className="text-xs text-blue-300 mb-1">Admin Panel v1.0</div>
-            <div className="text-xs text-blue-400">© 2026 All rights reserved</div>
-          </div>
+          {isMobile && (
+            <button
+              onClick={onToggle}
+              className="text-blue-600/70 hover:text-blue-600 p-2 rounded-lg hover:bg-blue-100/50 transition-all"
+            >
+              <FaTimes className="text-xl" />
+            </button>
+          )}
         </div>
-      )}
-    </div>
+
+        {/* Navigation Menu */}
+        <nav className="flex-1 overflow-y-auto py-6 px-3">
+          <div className="space-y-1">
+            {elements.map((item, idx) => (
+              <div key={idx}>
+                {item.dropdown ? (
+                  <>
+                    <button
+                      onClick={() => toggleDropdown(item.name)}
+                      className={`w-full flex items-center py-3 px-4 rounded-xl transition-all duration-200 cursor-pointer ${
+                        isDropdownActive(item.dropdown)
+                          ? 'bg-gradient-to-r from-blue-200/80 to-indigo-200/80 border border-blue-300/50 shadow-sm'
+                          : 'hover:bg-blue-100/50'
+                      }`}
+                    >
+                      <span className={`text-xl ${isDropdownActive(item.dropdown) ? 'text-blue-600' : 'text-blue-500/70'}`}>
+                        {item.icon}
+                      </span>
+                      {(!isCollapsed || isMobile) && (
+                        <>
+                          <span className={`ml-4 flex-1 text-left font-medium ${
+                            isDropdownActive(item.dropdown) ? 'text-blue-800' : 'text-blue-700/80'
+                          }`}>
+                            {item.name}
+                          </span>
+                          <FaChevronDown
+                            className={`text-xs transition-transform duration-200 ${
+                              openDropdown === item.name ? "rotate-180 text-blue-500" : "text-blue-400/60"
+                            }`}
+                          />
+                        </>
+                      )}
+                    </button>
+                    
+                    {/* Dropdown Menu - No underlines */}
+                    {openDropdown === item.name && (!isCollapsed || isMobile) && (
+                      <div className="ml-9 mt-2 mb-2 space-y-1">
+                        {item.dropdown.map((subItem, subIdx) => (
+                          <Link
+                            key={subIdx}
+                            to={subItem.path}
+                            onClick={() => {
+                              setOpenDropdown(null);
+                              if (isMobile && onToggle) onToggle();
+                            }}
+                            className={`flex items-center py-2.5 px-4 text-sm rounded-xl transition-all duration-200 ${
+                              isActive(subItem.path)
+                                ? 'bg-gradient-to-r from-blue-200/80 to-indigo-200/80 border-l-2 border-blue-500'
+                                : 'hover:bg-blue-100/50'
+                            }`}
+                            style={{ textDecoration: 'none' }}
+                          >
+                            <div className={`w-1.5 h-1.5 rounded-full mr-3 ${
+                              isActive(subItem.path) ? 'bg-blue-500' : 'bg-blue-300/60'
+                            }`} />
+                            <span className={`text-sm ${
+                              isActive(subItem.path) ? 'text-blue-800 font-medium' : 'text-blue-700/70'
+                            }`}
+                            style={{ textDecoration: 'none' }}>
+                              {subItem.name}
+                            </span>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  item.path ? (
+                    <Link
+                      to={item.path}
+                      onClick={() => {
+                        if (isMobile && onToggle) onToggle();
+                      }}
+                      className={`flex items-center py-3 px-4 rounded-xl transition-all duration-200 cursor-pointer ${
+                        isActive(item.path)
+                          ? 'bg-gradient-to-r from-blue-200/80 to-indigo-200/80 border border-blue-300/50 shadow-sm'
+                          : 'hover:bg-blue-100/50'
+                      } ${item.name === 'Logout' ? 'mt-6 border-t border-blue-200/50 pt-4' : ''}`}
+                      style={{ textDecoration: 'none' }}
+                    >
+                      <span className={`text-xl ${isActive(item.path) ? 'text-blue-600' : 'text-blue-500/70'}`}>
+                        {item.icon}
+                      </span>
+                      {(!isCollapsed || isMobile) && (
+                        <span className={`ml-4 ${isActive(item.path) ? 'text-blue-800 font-medium' : 'text-blue-700/80'} ${item.name === 'Logout' ? 'text-red-500' : ''}`}
+                        style={{ textDecoration: 'none' }}>
+                          {item.name}
+                        </span>
+                      )}
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={item.action}
+                      className={`w-full flex items-center py-3 px-4 rounded-xl transition-all duration-200 cursor-pointer hover:bg-blue-100/50 ${
+                        item.name === 'Logout' ? 'mt-6 border-t border-blue-200/50 pt-4' : ''
+                      }`}
+                    >
+                      <span className="text-xl text-blue-500/70">
+                        {item.icon}
+                      </span>
+                      {(!isCollapsed || isMobile) && (
+                        <span className="ml-4 text-red-500">
+                          {item.name}
+                        </span>
+                      )}
+                    </button>
+                  )
+                )}
+              </div>
+            ))}
+          </div>
+        </nav>
+
+        {/* Sidebar Footer */}
+        {(!isCollapsed || isMobile) && (
+          <div className="p-5 border-t border-blue-200/50 text-center">
+            <div className="flex items-center justify-center space-x-2 mb-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-[10px] text-blue-500/70">SYSTEM ONLINE</span>
+            </div>
+            <p className="text-[10px] text-blue-400/60">Liquid Admin Panel v2.0</p>
+            <p className="text-[9px] text-blue-300/50 mt-1">© 2026 All rights reserved</p>
+          </div>
+        )}
+      </div>
+
+      <style jsx>{`
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 0.5;
+          }
+          50% {
+            opacity: 1;
+          }
+        }
+        
+        .animate-pulse {
+          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        /* Custom Scrollbar */
+        .overflow-y-auto::-webkit-scrollbar {
+          width: 4px;
+        }
+        
+        .overflow-y-auto::-webkit-scrollbar-track {
+          background: rgba(59, 130, 246, 0.1);
+          border-radius: 10px;
+        }
+        
+        .overflow-y-auto::-webkit-scrollbar-thumb {
+          background: rgba(59, 130, 246, 0.3);
+          border-radius: 10px;
+        }
+        
+        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+          background: rgba(59, 130, 246, 0.5);
+        }
+        
+        /* Ensure all buttons and links are clickable and no underlines */
+        button, a {
+          cursor: pointer;
+          user-select: none;
+          text-decoration: none !important;
+        }
+        
+        a:hover, a:focus, a:active {
+          text-decoration: none !important;
+        }
+        
+        /* Remove any pointer-events issues */
+        .fixed, .relative, .absolute {
+          pointer-events: auto;
+        }
+        
+        /* Ensure z-index properly set */
+        .z-50 {
+          z-index: 50;
+        }
+        
+        .z-40 {
+          z-index: 40;
+        }
+        
+        /* Remove any default link styles */
+        a:link, a:visited, a:hover, a:active {
+          text-decoration: none !important;
+        }
+      `}</style>
+    </>
   );
 };
 

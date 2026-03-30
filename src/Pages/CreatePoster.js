@@ -41,7 +41,8 @@ import {
   FaItalic,
   FaUnderline,
   FaSquare,
-  FaRegCircle
+  FaRegCircle,
+  FaLanguage
 } from 'react-icons/fa';
 import html2canvas from 'html2canvas';
 
@@ -50,6 +51,7 @@ const BillBookCreator = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [language, setLanguage] = useState('en'); // 'en' or 'hi'
   
   const [templateImage, setTemplateImage] = useState(null);
   const [originalTemplateFile, setOriginalTemplateFile] = useState(null);
@@ -66,6 +68,14 @@ const BillBookCreator = () => {
     shape: 'rectangle',
     show: true
   });
+  
+  // Hindi translations for company info
+  const hindiTranslations = {
+    companyName: 'मेरा व्यवसाय प्राइवेट लिमिटेड',
+    companyAddress: '123 बिजनेस स्ट्रीट, डाउनटाउन, शहर - 123456',
+    companyEmail: 'info@mybusiness.com',
+    companyPhone: '+1 (234) 567-8900'
+  };
   
   const [billData, setBillData] = useState({
     companyName: 'My Business Pvt Ltd',
@@ -105,6 +115,20 @@ const BillBookCreator = () => {
   const canvasRef       = useRef(null);
   const billRef         = useRef(null);
 
+  // Get display text based on language
+  const getDisplayText = (field) => {
+    if (language === 'hi') {
+      switch(field) {
+        case 'companyName': return hindiTranslations.companyName;
+        case 'companyAddress': return hindiTranslations.companyAddress;
+        case 'companyEmail': return hindiTranslations.companyEmail;
+        case 'companyPhone': return hindiTranslations.companyPhone;
+        default: return billData[field];
+      }
+    }
+    return billData[field];
+  };
+
   const updateTextStyle = (field, styleName, value) => {
     setTextStyles(prev => ({
       ...prev,
@@ -137,12 +161,9 @@ const BillBookCreator = () => {
     if (billData.useTemplate && templateImage && canvasRef.current) {
       drawCanvasWithOverlays(true);
     }
-  }, [templateImage, billData, textStyles, previewImage, logoSettings]);
+  }, [templateImage, billData, textStyles, previewImage, logoSettings, language]);
 
-  // ─────────────────────────────────────────────
   // Draw canvas — textBaseline 'alphabetic' (default)
-  // Backend bhi same 'alphabetic' use karega
-  // ─────────────────────────────────────────────
   const drawCanvasWithOverlays = (withOverlays = true) => {
     if (!canvasRef.current || !templateImage) return;
     
@@ -158,17 +179,21 @@ const BillBookCreator = () => {
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       
       if (withOverlays) {
-        if (textStyles.companyName.show && billData.companyName) {
-          drawText(ctx, billData.companyName, textStyles.companyName, billData.fontFamily);
+        if (textStyles.companyName.show) {
+          const displayName = getDisplayText('companyName');
+          if (displayName) drawText(ctx, displayName, textStyles.companyName, billData.fontFamily);
         }
-        if (textStyles.companyAddress.show && billData.companyAddress) {
-          drawText(ctx, billData.companyAddress, textStyles.companyAddress, billData.fontFamily);
+        if (textStyles.companyAddress.show) {
+          const displayAddress = getDisplayText('companyAddress');
+          if (displayAddress) drawText(ctx, displayAddress, textStyles.companyAddress, billData.fontFamily);
         }
-        if (textStyles.companyEmail.show && billData.companyEmail) {
-          drawText(ctx, billData.companyEmail, textStyles.companyEmail, billData.fontFamily);
+        if (textStyles.companyEmail.show) {
+          const displayEmail = getDisplayText('companyEmail');
+          if (displayEmail) drawText(ctx, displayEmail, textStyles.companyEmail, billData.fontFamily);
         }
-        if (textStyles.companyPhone.show && billData.companyPhone) {
-          drawText(ctx, billData.companyPhone, textStyles.companyPhone, billData.fontFamily);
+        if (textStyles.companyPhone.show) {
+          const displayPhone = getDisplayText('companyPhone');
+          if (displayPhone) drawText(ctx, displayPhone, textStyles.companyPhone, billData.fontFamily);
         }
         if (billData.showLogo && previewImage && logoSettings.show) {
           drawLogo(ctx, previewImage, logoSettings);
@@ -178,7 +203,6 @@ const BillBookCreator = () => {
     img.src = templateImage;
   };
 
-  // ✅ textBaseline 'alphabetic' — backend se match karega
   const drawText = (ctx, text, style, fontFamily) => {
     if (!text) return;
     let fontStyle = '';
@@ -188,7 +212,7 @@ const BillBookCreator = () => {
     ctx.save();
     ctx.font          = `${fontStyle} ${style.fontSize}px ${fontFamily}`;
     ctx.fillStyle     = style.color;
-    ctx.textBaseline  = 'alphabetic'; // ✅ default — backend se same
+    ctx.textBaseline  = 'alphabetic';
 
     ctx.fillText(text, style.x, style.y);
     
@@ -247,7 +271,6 @@ const BillBookCreator = () => {
     logo.src = logoUrl;
   };
 
-  // RoundRect helper
   const roundRect = (ctx, x, y, w, h, r) => {
     if (w < 2 * r) r = w / 2;
     if (h < 2 * r) r = h / 2;
@@ -263,9 +286,6 @@ const BillBookCreator = () => {
     ctx.closePath();
   };
 
-  // ─────────────────────────────────────────────
-  // Mouse drag handlers
-  // ─────────────────────────────────────────────
   const handleCanvasMouseDown = (e) => {
     if (!billData.useTemplate) return;
     
@@ -281,14 +301,7 @@ const BillBookCreator = () => {
       const style = textStyles[field];
       if (!style || !style.show) continue;
 
-      let text = '';
-      switch (field) {
-        case 'companyName':    text = billData.companyName;    break;
-        case 'companyAddress': text = billData.companyAddress; break;
-        case 'companyEmail':   text = billData.companyEmail;   break;
-        case 'companyPhone':   text = billData.companyPhone;   break;
-        default: text = '';
-      }
+      let text = getDisplayText(field);
 
       if (!text) continue;
 
@@ -300,7 +313,6 @@ const BillBookCreator = () => {
       const textWidth  = tempCtx.measureText(text).width;
       const textHeight = style.fontSize;
 
-      // alphabetic baseline: y is the baseline, text goes UP from y
       if (
         mouseX >= style.x - 10 &&
         mouseX <= style.x + textWidth + 10 &&
@@ -314,7 +326,6 @@ const BillBookCreator = () => {
       }
     }
 
-    // Check logo hit
     if (billData.showLogo && previewImage && logoSettings.show) {
       if (
         mouseX >= logoSettings.x &&
@@ -425,6 +436,7 @@ const BillBookCreator = () => {
     setErrorMessage('');
     
     const formData = new FormData();
+    // Send the actual data (English) to backend, language is just for frontend display
     formData.append('companyName',    billData.companyName    || '');
     formData.append('companyAddress', billData.companyAddress || '');
     formData.append('companyEmail',   billData.companyEmail   || '');
@@ -432,6 +444,7 @@ const BillBookCreator = () => {
     formData.append('textStyles',     JSON.stringify(textStyles));
     formData.append('logoSettings',   JSON.stringify(logoSettings));
     formData.append('useTemplate',    billData.useTemplate ? 'true' : 'false');
+    formData.append('language',       language);
     formData.append('design', JSON.stringify({
       backgroundColor: billData.backgroundColor,
       textColor:       billData.textColor,
@@ -446,7 +459,6 @@ const BillBookCreator = () => {
     
     if (billData.logo) formData.append('logo', billData.logo);
     
-    // Template image — clean (no overlay)
     let templateBlob = null;
     if (originalTemplateFile) {
       templateBlob = await resizeImageToCanvasSize(originalTemplateFile);
@@ -458,7 +470,6 @@ const BillBookCreator = () => {
     }
     if (templateBlob) formData.append('templateImage', templateBlob, 'template.png');
     
-    // Preview image — canvas with overlays
     let finalImageBlob = null;
     if (billData.useTemplate && canvasRef.current && templateImage) {
       try {
@@ -482,10 +493,10 @@ const BillBookCreator = () => {
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
-      setSuccessMessage('Bill book created successfully!');
-      setTimeout(() => navigate('/billbooklist'), 2000);
+      setSuccessMessage(language === 'hi' ? 'बिल बुक सफलतापूर्वक बनाई गई!' : 'Bill book created successfully!');
+      setTimeout(() => navigate('/billbooks'), 2000);
     } catch (error) {
-      setErrorMessage(error.response?.data?.message || error.message || 'Error creating bill book');
+      setErrorMessage(error.response?.data?.message || error.message || (language === 'hi' ? 'बिल बुक बनाने में त्रुटि' : 'Error creating bill book'));
     } finally {
       setLoading(false);
     }
@@ -519,13 +530,13 @@ const BillBookCreator = () => {
               marginBottom: '15px'
             }} />
           )}
-          <h2 style={{ color: billData.accentColor, marginBottom: '10px', fontSize: '32px' }}>{billData.companyName}</h2>
-          <p style={{ fontSize: '12px', marginBottom: '5px', color: '#666' }}>{billData.companyAddress}</p>
-          <p style={{ fontSize: '12px', marginBottom: '5px', color: '#666' }}>{billData.companyEmail}</p>
-          <p style={{ fontSize: '12px', marginBottom: '0',  color: '#666' }}>{billData.companyPhone}</p>
+          <h2 style={{ color: billData.accentColor, marginBottom: '10px', fontSize: '32px' }}>{getDisplayText('companyName')}</h2>
+          <p style={{ fontSize: '12px', marginBottom: '5px', color: '#666' }}>{getDisplayText('companyAddress')}</p>
+          <p style={{ fontSize: '12px', marginBottom: '5px', color: '#666' }}>{getDisplayText('companyEmail')}</p>
+          <p style={{ fontSize: '12px', marginBottom: '0',  color: '#666' }}>{getDisplayText('companyPhone')}</p>
         </div>
         <div style={{ textAlign: 'center', fontSize: '11px', color: '#999', borderTop: '1px solid #e5e7eb', paddingTop: '20px', marginTop: '200px' }}>
-          <p style={{ marginBottom: '0' }}>Thank you for your business!</p>
+          <p style={{ marginBottom: '0' }}>{language === 'hi' ? 'आपके व्यवसाय के लिए धन्यवाद!' : 'Thank you for your business!'}</p>
         </div>
       </div>
     );
@@ -537,23 +548,41 @@ const BillBookCreator = () => {
         <Col md={6}>
           <Card className="shadow-lg border-0">
             <CardBody className="p-4" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
-              <CardTitle tag="h3" className="text-center text-primary mb-4"><FaBuilding className="me-2" />Bill Book Creator</CardTitle>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <CardTitle tag="h3" className="text-primary mb-0"><FaBuilding className="me-2" />Bill Book Creator</CardTitle>
+                <div>
+                  <Button 
+                    color={language === 'en' ? 'primary' : 'secondary'} 
+                    size="sm" 
+                    onClick={() => setLanguage('en')}
+                    className="me-2"
+                  >
+                    <FaLanguage /> English
+                  </Button>
+                  <Button 
+                    color={language === 'hi' ? 'primary' : 'secondary'} 
+                    size="sm" 
+                    onClick={() => setLanguage('hi')}
+                  >
+                    <FaLanguage /> हिंदी
+                  </Button>
+                </div>
+              </div>
 
               {errorMessage  && <Alert color="danger">{errorMessage}</Alert>}
               {successMessage && <Alert color="success">{successMessage}</Alert>}
 
-              {/* Template Section */}
               <div className="mb-4 p-3 border rounded bg-light">
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <Label className="fw-bold mb-0"><FaImages className="me-2" />Bill Template</Label>
+                  <Label className="fw-bold mb-0"><FaImages className="me-2" />{language === 'hi' ? 'बिल टेम्पलेट' : 'Bill Template'}</Label>
                   <Button size="sm" color="primary" onClick={() => setShowTemplatePicker(!showTemplatePicker)}>
-                    {billData.useTemplate ? 'Change Template' : 'Upload Template'}
+                    {billData.useTemplate ? (language === 'hi' ? 'टेम्पलेट बदलें' : 'Change Template') : (language === 'hi' ? 'टेम्पलेट अपलोड करें' : 'Upload Template')}
                   </Button>
                 </div>
                 {showTemplatePicker && (
                   <div className="mt-2">
                     <Button size="sm" color="secondary" onClick={() => templateInputRef.current.click()} className="w-100 mb-2">
-                      <FaCloudUploadAlt /> Upload Custom Template
+                      <FaCloudUploadAlt /> {language === 'hi' ? 'कस्टम टेम्पलेट अपलोड करें' : 'Upload Custom Template'}
                     </Button>
                     <input ref={templateInputRef} type="file" hidden onChange={handleTemplateUpload} accept="image/*" />
                     <div className="row">
@@ -570,112 +599,146 @@ const BillBookCreator = () => {
                 )}
                 {billData.useTemplate && templateImage && (
                   <Alert color="success" className="mt-2 mb-0">
-                    <FaCheckCircle className="me-1" /> Template loaded! <strong>Click and drag ANY element</strong> to reposition.
+                    <FaCheckCircle className="me-1" /> {language === 'hi' ? 'टेम्पलेट लोड हो गया! किसी भी तत्व को खींचकर पुनः स्थित करें।' : 'Template loaded! Click and drag ANY element to reposition.'}
                   </Alert>
                 )}
               </div>
 
               <Nav tabs className="mb-3">
-                <NavItem><NavLink className={activeTab === '1' ? 'active' : ''} onClick={() => setActiveTab('1')}><FaBuilding /> Company Info</NavLink></NavItem>
-                <NavItem><NavLink className={activeTab === '2' ? 'active' : ''} onClick={() => setActiveTab('2')}><FaPalette /> Text Style</NavLink></NavItem>
-                <NavItem><NavLink className={activeTab === '3' ? 'active' : ''} onClick={() => setActiveTab('3')}><FaImages /> Logo & Media</NavLink></NavItem>
+                <NavItem><NavLink className={activeTab === '1' ? 'active' : ''} onClick={() => setActiveTab('1')}><FaBuilding /> {language === 'hi' ? 'कंपनी की जानकारी' : 'Company Info'}</NavLink></NavItem>
+                <NavItem><NavLink className={activeTab === '2' ? 'active' : ''} onClick={() => setActiveTab('2')}><FaPalette /> {language === 'hi' ? 'टेक्स्ट स्टाइल' : 'Text Style'}</NavLink></NavItem>
+                <NavItem><NavLink className={activeTab === '3' ? 'active' : ''} onClick={() => setActiveTab('3')}><FaImages /> {language === 'hi' ? 'लोगो और मीडिया' : 'Logo & Media'}</NavLink></NavItem>
               </Nav>
 
               <Form onSubmit={handleSubmit}>
                 <TabContent activeTab={activeTab}>
 
-                  {/* Company Info Tab */}
                   <TabPane tabId="1">
-                    <FormGroup><Label>Company Name *</Label><Input value={billData.companyName} onChange={(e) => setBillData({...billData, companyName: e.target.value})} /></FormGroup>
-                    <FormGroup><Label>Company Address</Label><Input value={billData.companyAddress} onChange={(e) => setBillData({...billData, companyAddress: e.target.value})} /></FormGroup>
-                    <FormGroup><Label>Company Email</Label><Input type="email" value={billData.companyEmail} onChange={(e) => setBillData({...billData, companyEmail: e.target.value})} /></FormGroup>
-                    <FormGroup><Label>Company Phone</Label><Input value={billData.companyPhone} onChange={(e) => setBillData({...billData, companyPhone: e.target.value})} /></FormGroup>
+                    <FormGroup>
+                      <Label>{language === 'hi' ? 'कंपनी का नाम *' : 'Company Name *'}</Label>
+                      <Input 
+                        value={billData.companyName} 
+                        onChange={(e) => {
+                          setBillData({...billData, companyName: e.target.value});
+                          if (language === 'hi') hindiTranslations.companyName = e.target.value;
+                        }} 
+                      />
+                    </FormGroup>
+                    <FormGroup>
+                      <Label>{language === 'hi' ? 'कंपनी का पता' : 'Company Address'}</Label>
+                      <Input 
+                        value={billData.companyAddress} 
+                        onChange={(e) => {
+                          setBillData({...billData, companyAddress: e.target.value});
+                          if (language === 'hi') hindiTranslations.companyAddress = e.target.value;
+                        }} 
+                      />
+                    </FormGroup>
+                    <FormGroup>
+                      <Label>{language === 'hi' ? 'कंपनी ईमेल' : 'Company Email'}</Label>
+                      <Input 
+                        type="email" 
+                        value={billData.companyEmail} 
+                        onChange={(e) => {
+                          setBillData({...billData, companyEmail: e.target.value});
+                          if (language === 'hi') hindiTranslations.companyEmail = e.target.value;
+                        }} 
+                      />
+                    </FormGroup>
+                    <FormGroup>
+                      <Label>{language === 'hi' ? 'कंपनी फोन' : 'Company Phone'}</Label>
+                      <Input 
+                        value={billData.companyPhone} 
+                        onChange={(e) => {
+                          setBillData({...billData, companyPhone: e.target.value});
+                          if (language === 'hi') hindiTranslations.companyPhone = e.target.value;
+                        }} 
+                      />
+                    </FormGroup>
                   </TabPane>
 
-                  {/* Text Style Tab */}
                   <TabPane tabId="2">
                     <FormGroup>
-                      <Label>Select Field to Style</Label>
+                      <Label>{language === 'hi' ? 'स्टाइल करने के लिए फ़ील्ड चुनें' : 'Select Field to Style'}</Label>
                       <Input type="select" value={selectedElement} onChange={(e) => setSelectedElement(e.target.value)}>
-                        <option value="companyName">Company Name</option>
-                        <option value="companyAddress">Company Address</option>
-                        <option value="companyEmail">Company Email</option>
-                        <option value="companyPhone">Company Phone</option>
+                        <option value="companyName">{language === 'hi' ? 'कंपनी का नाम' : 'Company Name'}</option>
+                        <option value="companyAddress">{language === 'hi' ? 'कंपनी का पता' : 'Company Address'}</option>
+                        <option value="companyEmail">{language === 'hi' ? 'कंपनी ईमेल' : 'Company Email'}</option>
+                        <option value="companyPhone">{language === 'hi' ? 'कंपनी फोन' : 'Company Phone'}</option>
                       </Input>
                     </FormGroup>
                     {selectedElement && textStyles[selectedElement] && (
                       <>
                         <Row>
-                          <Col xs={6}><FormGroup><Label><FaFont /> Font Size (px)</Label><Input type="number" value={textStyles[selectedElement]?.fontSize || 12} onChange={(e) => updateTextStyle(selectedElement, 'fontSize', parseInt(e.target.value))} /></FormGroup></Col>
-                          <Col xs={6}><FormGroup><Label><FaFillDrip /> Color</Label><Input type="color" value={textStyles[selectedElement]?.color || '#000000'} onChange={(e) => updateTextStyle(selectedElement, 'color', e.target.value)} /></FormGroup></Col>
+                          <Col xs={6}><FormGroup><Label><FaFont /> {language === 'hi' ? 'फ़ॉन्ट आकार (px)' : 'Font Size (px)'}</Label><Input type="number" value={textStyles[selectedElement]?.fontSize || 12} onChange={(e) => updateTextStyle(selectedElement, 'fontSize', parseInt(e.target.value))} /></FormGroup></Col>
+                          <Col xs={6}><FormGroup><Label><FaFillDrip /> {language === 'hi' ? 'रंग' : 'Color'}</Label><Input type="color" value={textStyles[selectedElement]?.color || '#000000'} onChange={(e) => updateTextStyle(selectedElement, 'color', e.target.value)} /></FormGroup></Col>
                         </Row>
                         <Row>
-                          <Col xs={6}><FormGroup><Label><FaBold /> Font Weight</Label><Input type="select" value={textStyles[selectedElement]?.fontWeight || 'normal'} onChange={(e) => updateTextStyle(selectedElement, 'fontWeight', e.target.value)}><option value="normal">Normal</option><option value="bold">Bold</option></Input></FormGroup></Col>
-                          <Col xs={6}><FormGroup check className="mt-4"><Label check><Input type="checkbox" checked={textStyles[selectedElement]?.italic || false} onChange={(e) => updateTextStyle(selectedElement, 'italic', e.target.checked)} /><span className="ms-2"><FaItalic /> Italic</span></Label></FormGroup></Col>
+                          <Col xs={6}><FormGroup><Label><FaBold /> {language === 'hi' ? 'फ़ॉन्ट वजन' : 'Font Weight'}</Label><Input type="select" value={textStyles[selectedElement]?.fontWeight || 'normal'} onChange={(e) => updateTextStyle(selectedElement, 'fontWeight', e.target.value)}><option value="normal">{language === 'hi' ? 'सामान्य' : 'Normal'}</option><option value="bold">{language === 'hi' ? 'बोल्ड' : 'Bold'}</option></Input></FormGroup></Col>
+                          <Col xs={6}><FormGroup check className="mt-4"><Label check><Input type="checkbox" checked={textStyles[selectedElement]?.italic || false} onChange={(e) => updateTextStyle(selectedElement, 'italic', e.target.checked)} /><span className="ms-2"><FaItalic /> {language === 'hi' ? 'इटैलिक' : 'Italic'}</span></Label></FormGroup></Col>
                         </Row>
-                        <FormGroup check><Label check><Input type="checkbox" checked={textStyles[selectedElement]?.underline || false} onChange={(e) => updateTextStyle(selectedElement, 'underline', e.target.checked)} /><span className="ms-2"><FaUnderline /> Underline</span></Label></FormGroup>
-                        {billData.useTemplate && <Alert color="info" className="mt-2"><FaArrowsAlt className="me-2" />Click and drag this element on preview to reposition</Alert>}
+                        <FormGroup check><Label check><Input type="checkbox" checked={textStyles[selectedElement]?.underline || false} onChange={(e) => updateTextStyle(selectedElement, 'underline', e.target.checked)} /><span className="ms-2"><FaUnderline /> {language === 'hi' ? 'अंडरलाइन' : 'Underline'}</span></Label></FormGroup>
+                        {billData.useTemplate && <Alert color="info" className="mt-2"><FaArrowsAlt className="me-2" />{language === 'hi' ? 'प्रीव्यू पर इस तत्व को खींचकर पुनः स्थित करें' : 'Click and drag this element on preview to reposition'}</Alert>}
                       </>
                     )}
                     <hr />
-                    <h6 className="mt-3">Bill Design</h6>
+                    <h6 className="mt-3">{language === 'hi' ? 'बिल डिज़ाइन' : 'Bill Design'}</h6>
                     <Row>
-                      <Col xs={6}><FormGroup><Label>Background Color</Label><Input type="color" value={billData.backgroundColor} onChange={(e) => setBillData({...billData, backgroundColor: e.target.value})} /></FormGroup></Col>
-                      <Col xs={6}><FormGroup><Label>Text Color</Label><Input type="color" value={billData.textColor} onChange={(e) => setBillData({...billData, textColor: e.target.value})} /></FormGroup></Col>
-                      <Col xs={6}><FormGroup><Label>Accent Color</Label><Input type="color" value={billData.accentColor} onChange={(e) => setBillData({...billData, accentColor: e.target.value})} /></FormGroup></Col>
-                      <Col xs={6}><FormGroup><Label>Font Family</Label><Input type="select" value={billData.fontFamily} onChange={(e) => setBillData({...billData, fontFamily: e.target.value})}><option>Poppins</option><option>Arial</option><option>Helvetica</option><option>Georgia</option></Input></FormGroup></Col>
+                      <Col xs={6}><FormGroup><Label>{language === 'hi' ? 'पृष्ठभूमि रंग' : 'Background Color'}</Label><Input type="color" value={billData.backgroundColor} onChange={(e) => setBillData({...billData, backgroundColor: e.target.value})} /></FormGroup></Col>
+                      <Col xs={6}><FormGroup><Label>{language === 'hi' ? 'टेक्स्ट रंग' : 'Text Color'}</Label><Input type="color" value={billData.textColor} onChange={(e) => setBillData({...billData, textColor: e.target.value})} /></FormGroup></Col>
+                      <Col xs={6}><FormGroup><Label>{language === 'hi' ? 'एक्सेंट रंग' : 'Accent Color'}</Label><Input type="color" value={billData.accentColor} onChange={(e) => setBillData({...billData, accentColor: e.target.value})} /></FormGroup></Col>
+                      <Col xs={6}><FormGroup><Label>{language === 'hi' ? 'फ़ॉन्ट परिवार' : 'Font Family'}</Label><Input type="select" value={billData.fontFamily} onChange={(e) => setBillData({...billData, fontFamily: e.target.value})}><option>Poppins</option><option>Arial</option><option>Helvetica</option><option>Georgia</option></Input></FormGroup></Col>
                     </Row>
-                    <FormGroup check><Label check><Input type="checkbox" checked={billData.roundedCorners} onChange={(e) => setBillData({...billData, roundedCorners: e.target.checked})} /><span className="ms-2">Rounded Corners</span></Label></FormGroup>
-                    <FormGroup check><Label check><Input type="checkbox" checked={billData.shadow} onChange={(e) => setBillData({...billData, shadow: e.target.checked})} /><span className="ms-2">Show Shadow</span></Label></FormGroup>
-                    <FormGroup check><Label check><Input type="checkbox" checked={billData.border} onChange={(e) => setBillData({...billData, border: e.target.checked})} /><span className="ms-2">Show Border</span></Label></FormGroup>
+                    <FormGroup check><Label check><Input type="checkbox" checked={billData.roundedCorners} onChange={(e) => setBillData({...billData, roundedCorners: e.target.checked})} /><span className="ms-2">{language === 'hi' ? 'गोल कोने' : 'Rounded Corners'}</span></Label></FormGroup>
+                    <FormGroup check><Label check><Input type="checkbox" checked={billData.shadow} onChange={(e) => setBillData({...billData, shadow: e.target.checked})} /><span className="ms-2">{language === 'hi' ? 'छाया दिखाएं' : 'Show Shadow'}</span></Label></FormGroup>
+                    <FormGroup check><Label check><Input type="checkbox" checked={billData.border} onChange={(e) => setBillData({...billData, border: e.target.checked})} /><span className="ms-2">{language === 'hi' ? 'बॉर्डर दिखाएं' : 'Show Border'}</span></Label></FormGroup>
                   </TabPane>
 
-                  {/* Logo & Media Tab */}
                   <TabPane tabId="3">
                     <FormGroup>
-                      <Label>Logo Image</Label>
+                      <Label>{language === 'hi' ? 'लोगो छवि' : 'Logo Image'}</Label>
                       <div className="border rounded p-3 text-center" onClick={() => logoInputRef.current.click()} style={{ cursor: 'pointer', backgroundColor: '#f8f9fa' }}>
-                        {previewImage ? <img src={previewImage} style={{ maxHeight: '100px' }} alt="Logo" /> : <><FaCloudUploadAlt size={40} /><p>Upload Logo</p></>}
+                        {previewImage ? <img src={previewImage} style={{ maxHeight: '100px' }} alt="Logo" /> : <><FaCloudUploadAlt size={40} /><p>{language === 'hi' ? 'लोगो अपलोड करें' : 'Upload Logo'}</p></>}
                       </div>
                       <input ref={logoInputRef} type="file" hidden onChange={handleLogoChange} accept="image/*" />
                     </FormGroup>
                     <FormGroup check>
-                      <Label check><Input type="checkbox" checked={billData.showLogo} onChange={(e) => setBillData({...billData, showLogo: e.target.checked})} /><span className="ms-2">Show Logo on Bill</span></Label>
+                      <Label check><Input type="checkbox" checked={billData.showLogo} onChange={(e) => setBillData({...billData, showLogo: e.target.checked})} /><span className="ms-2">{language === 'hi' ? 'बिल पर लोगो दिखाएं' : 'Show Logo on Bill'}</span></Label>
                     </FormGroup>
                     {billData.showLogo && previewImage && (
                       <>
-                        <h6 className="mt-3">Logo Customization</h6>
+                        <h6 className="mt-3">{language === 'hi' ? 'लोगो कस्टमाइज़ेशन' : 'Logo Customization'}</h6>
                         <Row>
-                          <Col xs={6}><FormGroup><Label>Width (px)</Label><Input type="number" value={logoSettings.width} onChange={(e) => updateLogoSize(parseInt(e.target.value), logoSettings.height)} /></FormGroup></Col>
-                          <Col xs={6}><FormGroup><Label>Height (px)</Label><Input type="number" value={logoSettings.height} onChange={(e) => updateLogoSize(logoSettings.width, parseInt(e.target.value))} /></FormGroup></Col>
+                          <Col xs={6}><FormGroup><Label>{language === 'hi' ? 'चौड़ाई (px)' : 'Width (px)'}</Label><Input type="number" value={logoSettings.width} onChange={(e) => updateLogoSize(parseInt(e.target.value), logoSettings.height)} /></FormGroup></Col>
+                          <Col xs={6}><FormGroup><Label>{language === 'hi' ? 'ऊंचाई (px)' : 'Height (px)'}</Label><Input type="number" value={logoSettings.height} onChange={(e) => updateLogoSize(logoSettings.width, parseInt(e.target.value))} /></FormGroup></Col>
                         </Row>
                         <FormGroup>
-                          <Label>Logo Shape</Label>
+                          <Label>{language === 'hi' ? 'लोगो आकार' : 'Logo Shape'}</Label>
                           <div className="d-flex gap-3">
-                            <Button size="sm" color={logoSettings.shape === 'rectangle' ? 'primary' : 'secondary'} onClick={() => setLogoSettings({...logoSettings, shape: 'rectangle'})}><FaSquare /> Rectangle</Button>
-                            <Button size="sm" color={logoSettings.shape === 'rounded'   ? 'primary' : 'secondary'} onClick={() => setLogoSettings({...logoSettings, shape: 'rounded'})}><FaSquare /> Rounded</Button>
-                            <Button size="sm" color={logoSettings.shape === 'circle'    ? 'primary' : 'secondary'} onClick={() => setLogoSettings({...logoSettings, shape: 'circle'})}><FaRegCircle /> Circle</Button>
+                            <Button size="sm" color={logoSettings.shape === 'rectangle' ? 'primary' : 'secondary'} onClick={() => setLogoSettings({...logoSettings, shape: 'rectangle'})}><FaSquare /> {language === 'hi' ? 'आयत' : 'Rectangle'}</Button>
+                            <Button size="sm" color={logoSettings.shape === 'rounded'   ? 'primary' : 'secondary'} onClick={() => setLogoSettings({...logoSettings, shape: 'rounded'})}><FaSquare /> {language === 'hi' ? 'गोल' : 'Rounded'}</Button>
+                            <Button size="sm" color={logoSettings.shape === 'circle'    ? 'primary' : 'secondary'} onClick={() => setLogoSettings({...logoSettings, shape: 'circle'})}><FaRegCircle /> {language === 'hi' ? 'वृत्त' : 'Circle'}</Button>
                           </div>
                         </FormGroup>
                         {(logoSettings.shape === 'rounded' || logoSettings.shape === 'rectangle') && (
-                          <Row><Col xs={6}><FormGroup><Label>Border Radius (px)</Label><Input type="number" value={logoSettings.borderRadius} onChange={(e) => setLogoSettings({...logoSettings, borderRadius: parseInt(e.target.value)})} /></FormGroup></Col></Row>
+                          <Row><Col xs={6}><FormGroup><Label>{language === 'hi' ? 'बॉर्डर त्रिज्या (px)' : 'Border Radius (px)'}</Label><Input type="number" value={logoSettings.borderRadius} onChange={(e) => setLogoSettings({...logoSettings, borderRadius: parseInt(e.target.value)})} /></FormGroup></Col></Row>
                         )}
                         <Row>
-                          <Col xs={6}><FormGroup><Label>Border Width (px)</Label><Input type="number" value={logoSettings.borderWidth} onChange={(e) => setLogoSettings({...logoSettings, borderWidth: parseInt(e.target.value)})} /></FormGroup></Col>
+                          <Col xs={6}><FormGroup><Label>{language === 'hi' ? 'बॉर्डर चौड़ाई (px)' : 'Border Width (px)'}</Label><Input type="number" value={logoSettings.borderWidth} onChange={(e) => setLogoSettings({...logoSettings, borderWidth: parseInt(e.target.value)})} /></FormGroup></Col>
                           {logoSettings.borderWidth > 0 && (
-                            <Col xs={6}><FormGroup><Label>Border Color</Label><Input type="color" value={logoSettings.borderColor} onChange={(e) => setLogoSettings({...logoSettings, borderColor: e.target.value})} /></FormGroup></Col>
+                            <Col xs={6}><FormGroup><Label>{language === 'hi' ? 'बॉर्डर रंग' : 'Border Color'}</Label><Input type="color" value={logoSettings.borderColor} onChange={(e) => setLogoSettings({...logoSettings, borderColor: e.target.value})} /></FormGroup></Col>
                           )}
                         </Row>
-                        {billData.useTemplate && <Alert color="info" className="mt-2"><FaArrowsAlt className="me-2" />Click and drag logo on preview to reposition</Alert>}
+                        {billData.useTemplate && <Alert color="info" className="mt-2"><FaArrowsAlt className="me-2" />{language === 'hi' ? 'प्रीव्यू पर लोगो को खींचकर पुनः स्थित करें' : 'Click and drag logo on preview to reposition'}</Alert>}
                       </>
                     )}
                   </TabPane>
                 </TabContent>
 
                 <div className="d-flex justify-content-end gap-2 mt-4">
-                  <Button color="secondary" onClick={() => navigate('/billbooks')}>Cancel</Button>
+                  <Button color="secondary" onClick={() => navigate('/billbooks')}>{language === 'hi' ? 'रद्द करें' : 'Cancel'}</Button>
                   <Button color="primary" type="submit" disabled={loading}>
-                    {loading ? <><FaSpinner className="spinner-border-sm me-1" /> Creating...</> : <><FaSave /> Create Bill Book</>}
+                    {loading ? <><FaSpinner className="spinner-border-sm me-1" /> {language === 'hi' ? 'बना रहा है...' : 'Creating...'}</> : <><FaSave /> {language === 'hi' ? 'बिल बुक बनाएं' : 'Create Bill Book'}</>}
                   </Button>
                 </div>
               </Form>
@@ -687,8 +750,8 @@ const BillBookCreator = () => {
           <Card className="shadow-lg border-0 sticky-top" style={{ top: '20px' }}>
             <CardBody className="p-4">
               <CardTitle tag="h4" className="text-center mb-3">
-                Live Preview
-                {billData.useTemplate && <small className="d-block text-muted"><FaMousePointer /> Click and drag ANY element to reposition</small>}
+                {language === 'hi' ? 'लाइव प्रीव्यू' : 'Live Preview'}
+                {billData.useTemplate && <small className="d-block text-muted"><FaMousePointer /> {language === 'hi' ? 'किसी भी तत्व को खींचकर पुनः स्थित करें' : 'Click and drag ANY element to reposition'}</small>}
               </CardTitle>
               <div className="preview-container" style={{ maxHeight: '80vh', overflowY: 'auto', textAlign: 'center' }}>
                 {billData.useTemplate && templateImage ? (
@@ -705,8 +768,8 @@ const BillBookCreator = () => {
                 ) : renderBillBook()}
               </div>
               <div className="d-flex gap-2 mt-3">
-                <Button color="success" onClick={downloadBill} className="flex-grow-1"><FaDownload /> Download Bill</Button>
-                <Button color="info" onClick={() => setShowFullPreview(true)} className="flex-grow-1"><FaEye /> Full Preview</Button>
+                <Button color="success" onClick={downloadBill} className="flex-grow-1"><FaDownload /> {language === 'hi' ? 'बिल डाउनलोड करें' : 'Download Bill'}</Button>
+                <Button color="info" onClick={() => setShowFullPreview(true)} className="flex-grow-1"><FaEye /> {language === 'hi' ? 'पूर्ण प्रीव्यू' : 'Full Preview'}</Button>
               </div>
             </CardBody>
           </Card>
@@ -723,8 +786,8 @@ const BillBookCreator = () => {
                   : renderBillBook()
                 }
                 <div className="mt-3">
-                  <Button color="success" onClick={downloadBill}><FaDownload /> Download</Button>
-                  <Button color="secondary" className="ms-2" onClick={() => setShowFullPreview(false)}>Close</Button>
+                  <Button color="success" onClick={downloadBill}><FaDownload /> {language === 'hi' ? 'डाउनलोड' : 'Download'}</Button>
+                  <Button color="secondary" className="ms-2" onClick={() => setShowFullPreview(false)}>{language === 'hi' ? 'बंद करें' : 'Close'}</Button>
                 </div>
               </div>
             </div>

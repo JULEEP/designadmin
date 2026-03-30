@@ -91,6 +91,8 @@ import PaymentList from "./Pages/PaymentList.js";
 import RedemptionRequests from "./Pages/RedemptionRequests.js";
 import ManageReels from "./Pages/ManageReels.js";
 import ManageAudios from "./Pages/ManageAudios.js";
+import VisitingCardCreator from "./Pages/VisitingCardCreator.js";
+import DoctorPrescriptionCreator from "./Pages/DoctorPrescriptionCreator.js";
 
 
 
@@ -196,6 +198,8 @@ function App() {
                <Route path="/redemptions" element={<RedemptionRequests />} />
                 <Route path="/reels" element={<ManageReels />} />
               <Route path="/audio" element={<ManageAudios />} />
+              <Route path="/create-visitingcard" element={<VisitingCardCreator />} />
+              <Route path="/create-prescription" element={<DoctorPrescriptionCreator />} />
 
 
 

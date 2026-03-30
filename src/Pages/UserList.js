@@ -19,7 +19,7 @@ export default function UserList() {
   const fetchUsers = () => {
     setLoading(true);
     axios
-      .get("http://localhost:4050/api/admin/users")
+      .get("https://designback.onrender.com/api/admin/users")
       .then((res) => {
         if (res.data && res.data.users) {
           setUsers(res.data.users);
@@ -37,7 +37,7 @@ export default function UserList() {
   const handleDelete = async (id, name) => {
     if (window.confirm(`Are you sure you want to delete user "${name}"?`)) {
       try {
-        await axios.delete(`http://localhost:4050/api/admin/deleteusers/${id}`);
+        await axios.delete(`https://designback.onrender.com/api/admin/deleteusers/${id}`);
         alert("User deleted successfully");
         setUsers(users.filter((user) => user._id !== id));
         if (selectedUser?._id === id) {
@@ -449,7 +449,7 @@ export default function UserList() {
                           <p className="text-xs text-gray-500 uppercase tracking-wide">Company Logo</p>
                           <div className="mt-2">
                             <img 
-                              src={`http://localhost:4050${selectedUser.businessDetails.logo}`} 
+                              src={`https://designback.onrender.com${selectedUser.businessDetails.logo}`} 
                               alt="Company Logo" 
                               className="max-h-24 object-contain bg-white rounded-lg p-2 border"
                               onError={(e) => e.target.style.display = 'none'}

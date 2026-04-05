@@ -12,8 +12,8 @@ import {
   FaPhone, FaGraduationCap
 } from 'react-icons/fa';
 
-const API_URL = 'http://localhost:4050/api/admin';
-const STATIC_URL = 'http://localhost:4050';
+const API_URL = 'https://designback.onrender.com/api/admin';
+const STATIC_URL = 'https://designback.onrender.com';
 
 const PrescriptionsList = () => {
   const [prescriptions, setPrescriptions] = useState([]);

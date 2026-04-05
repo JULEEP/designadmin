@@ -14,7 +14,7 @@ import {
 } from 'react-icons/fa';
 import html2canvas from 'html2canvas';
 
-const API_URL = 'http://localhost:4050/api/admin';
+const API_URL = 'https://designback.onrender.com/api/admin';
 
 const DoctorPrescriptionCreator = () => {
   const [activeTab, setActiveTab] = useState('1');

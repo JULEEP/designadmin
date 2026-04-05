@@ -14,7 +14,7 @@ import {
   FaUserFriends, FaPlus, FaTimes, FaUser, FaVenusMars, FaAddressCard
 } from 'react-icons/fa';
 
-const API_URL = 'http://localhost:4050/api/admin';
+const API_URL = 'https://designback.onrender.com/api/admin';
 
 const WeddingCardCreator = () => {
   const [activeTab, setActiveTab] = useState('1');

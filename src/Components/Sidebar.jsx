@@ -84,6 +84,14 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
       ],
     },
     {
+      icon: <i className="ri-heart-line text-xl"></i>,
+      name: "Wedding Cards",
+      dropdown: [
+        { name: "Create Wedding Card", path: "/create-weddingcard" },
+        { name: "All Wedding Cards", path: "/weddingcards" },
+      ],
+    },
+    {
       icon: <i className="ri-image-line text-xl"></i>,
       name: "Banners",
       dropdown: [

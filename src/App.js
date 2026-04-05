@@ -93,6 +93,9 @@ import ManageReels from "./Pages/ManageReels.js";
 import ManageAudios from "./Pages/ManageAudios.js";
 import VisitingCardCreator from "./Pages/VisitingCardCreator.js";
 import DoctorPrescriptionCreator from "./Pages/DoctorPrescriptionCreator.js";
+import WeddingCardCreator from "./Pages/WeddingCardCreator.js";
+import PrescriptionsList from "./Pages/PrescriptionsList.js";
+import WeddingCardsList from "./Pages/WeddingCardsList.js";
 
 
 
@@ -200,6 +203,9 @@ function App() {
               <Route path="/audio" element={<ManageAudios />} />
               <Route path="/create-visitingcard" element={<VisitingCardCreator />} />
               <Route path="/create-prescription" element={<DoctorPrescriptionCreator />} />
+              <Route path="/prescriptions" element={<PrescriptionsList />} />
+              <Route path="/create-weddingcard" element={<WeddingCardCreator />} />
+              <Route path="/weddingcards" element={<WeddingCardsList />} />
 
 
 

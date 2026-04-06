@@ -92,6 +92,14 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
       ],
     },
     {
+      icon: <i className="ri-receipt-line text-xl"></i>,
+      name: "Receipts",
+      dropdown: [
+        { name: "Create Receipt", path: "/create-receipt" },
+        { name: "All Receipts", path: "/receipts" },
+      ],
+    },
+    {
       icon: <i className="ri-image-line text-xl"></i>,
       name: "Banners",
       dropdown: [

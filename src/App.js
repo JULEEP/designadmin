@@ -96,6 +96,8 @@ import DoctorPrescriptionCreator from "./Pages/DoctorPrescriptionCreator.js";
 import WeddingCardCreator from "./Pages/WeddingCardCreator.js";
 import PrescriptionsList from "./Pages/PrescriptionsList.js";
 import WeddingCardsList from "./Pages/WeddingCardsList.js";
+import CreateReceipt from "./Pages/CreateReceipt.js";
+import ReceiptList from "./Pages/ReceiptList.js";
 
 
 
@@ -206,6 +208,8 @@ function App() {
               <Route path="/prescriptions" element={<PrescriptionsList />} />
               <Route path="/create-weddingcard" element={<WeddingCardCreator />} />
               <Route path="/weddingcards" element={<WeddingCardsList />} />
+              <Route path="/create-receipt" element={<CreateReceipt />} />
+              <Route path="/receipts" element={<ReceiptList />} />
 
 
 

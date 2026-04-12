@@ -2701,7 +2701,7 @@
 
 
 
-// WeddingCardCreator.jsx - COMPLETE WITH FRAME SIZES, UNITS & SINGLE UPLOAD
+// WeddingCardCreator.jsx - COMPLETE WITH UNIT SYSTEM ONLY (NO PRESETS)
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Container, Form, FormGroup, Label, Input, Button, Card, CardBody,
@@ -2736,6 +2736,9 @@ const WeddingCardCreator = () => {
   const PX_PER_INCH = 96;
   const MM_PER_INCH = 25.4;
   
+  // Canvas size in pixels
+  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 1131 });
+  
   // Get size in current unit
   const getSizeInUnit = (pxValue, targetUnit) => {
     if (targetUnit === 'px') return pxValue;
@@ -2752,17 +2755,9 @@ const WeddingCardCreator = () => {
     return value;
   };
   
-  // Frame size options (in pixels internally)
-  const frameSizes = {
-    a4: { name: 'A4', width: 800, height: 1131 },
-    letter: { name: 'Letter', width: 800, height: 1035 },
-    square: { name: 'Square', width: 800, height: 800 },
-    wide: { name: 'Wide', width: 900, height: 600 },
-    custom: { name: 'Custom', width: 800, height: 1000 }
-  };
-  
-  const [selectedFrame, setSelectedFrame] = useState('a4');
-  const [customSize, setCustomSize] = useState({ width: 800, height: 1000 });
+  // Display dimensions in current unit
+  const displayWidth = getSizeInUnit(canvasSize.width, unit).toFixed(2);
+  const displayHeight = getSizeInUnit(canvasSize.height, unit).toFixed(2);
   
   // THREE SEPARATE IMAGES
   const [frontImage, setFrontImage] = useState(null);
@@ -2894,24 +2889,9 @@ const WeddingCardCreator = () => {
   
   const navigate = useNavigate();
 
-  // Get current dimensions for selected side in pixels
-  const getCurrentDimensions = () => {
-    if (selectedFrame === 'custom') {
-      return { width: customSize.width, height: customSize.height };
-    }
-    const frame = frameSizes[selectedFrame];
-    return { width: frame.width, height: frame.height };
-  };
-
-  // Display dimensions in current unit
-  const dimensions = getCurrentDimensions();
-  const displayWidth = getSizeInUnit(dimensions.width, unit).toFixed(2);
-  const displayHeight = getSizeInUnit(dimensions.height, unit).toFixed(2);
-
   // Adjust dimensions for inside side (slightly taller)
   const getInsideDimensions = () => {
-    const dims = getCurrentDimensions();
-    return { width: dims.width, height: dims.height + 50 };
+    return { width: canvasSize.width, height: canvasSize.height + 50 };
   };
 
   const sampleTemplates = {
@@ -3011,9 +2991,8 @@ const WeddingCardCreator = () => {
   const handleSizeChange = async (newWidthPx, newHeightPx) => {
     if (newWidthPx < 100 || newHeightPx < 100) return;
     
-    const oldDimensions = getCurrentDimensions();
-    const scaleX = newWidthPx / oldDimensions.width;
-    const scaleY = newHeightPx / oldDimensions.height;
+    const scaleX = newWidthPx / canvasSize.width;
+    const scaleY = newHeightPx / canvasSize.height;
     
     // Adjust text positions proportionally
     const newTextStyles = {};
@@ -3036,14 +3015,7 @@ const WeddingCardCreator = () => {
       height: prev.height * scaleY
     }));
     
-    // Update dimensions based on frame type
-    if (selectedFrame === 'custom') {
-      setCustomSize({ width: newWidthPx, height: newHeightPx });
-    } else {
-      frameSizes[selectedFrame].width = newWidthPx;
-      frameSizes[selectedFrame].height = newHeightPx;
-      setSelectedFrame(selectedFrame);
-    }
+    setCanvasSize({ width: newWidthPx, height: newHeightPx });
     
     // Resize template images if they exist
     if (frontImage && originalFrontFile) {
@@ -3073,10 +3045,10 @@ const WeddingCardCreator = () => {
     const incrementValue = unit === 'px' ? 10 : (unit === 'in' ? 0.1 : 2);
     if (dimension === 'width') {
       const newWidthPx = convertToPx(parseFloat(displayWidth) + incrementValue, unit);
-      handleSizeChange(newWidthPx, dimensions.height);
+      handleSizeChange(newWidthPx, canvasSize.height);
     } else {
       const newHeightPx = convertToPx(parseFloat(displayHeight) + incrementValue, unit);
-      handleSizeChange(dimensions.width, newHeightPx);
+      handleSizeChange(canvasSize.width, newHeightPx);
     }
   };
 
@@ -3084,18 +3056,10 @@ const WeddingCardCreator = () => {
     const decrementValue = unit === 'px' ? 10 : (unit === 'in' ? 0.1 : 2);
     if (dimension === 'width') {
       const newWidthPx = convertToPx(Math.max(100, parseFloat(displayWidth) - decrementValue), unit);
-      handleSizeChange(newWidthPx, dimensions.height);
+      handleSizeChange(newWidthPx, canvasSize.height);
     } else {
       const newHeightPx = convertToPx(Math.max(100, parseFloat(displayHeight) - decrementValue), unit);
-      handleSizeChange(dimensions.width, newHeightPx);
-    }
-  };
-
-  const handleFrameSelect = (frameId) => {
-    setSelectedFrame(frameId);
-    if (frameId !== 'custom') {
-      const frame = frameSizes[frameId];
-      handleSizeChange(frame.width, frame.height);
+      handleSizeChange(canvasSize.width, newHeightPx);
     }
   };
 
@@ -3103,10 +3067,9 @@ const WeddingCardCreator = () => {
   const drawFrontCanvas = () => {
     const canvas = frontCanvasRef.current;
     if (!canvas) return;
-    const dimensions = getCurrentDimensions();
     const ctx = canvas.getContext('2d');
-    canvas.width = dimensions.width;
-    canvas.height = dimensions.height;
+    canvas.width = canvasSize.width;
+    canvas.height = canvasSize.height;
     
     const drawOverlay = () => {
       // Draw front side text fields
@@ -3287,24 +3250,23 @@ const WeddingCardCreator = () => {
   const drawBackCanvas = () => {
     const canvas = backCanvasRef.current;
     if (!canvas) return;
-    const dimensions = getCurrentDimensions();
     const ctx = canvas.getContext('2d');
-    canvas.width = dimensions.width;
-    canvas.height = dimensions.height;
+    canvas.width = canvasSize.width;
+    canvas.height = canvasSize.height;
     
     const drawBackText = (ctx) => {
       ctx.font = `bold 32px ${cardData.fontFamily}`;
       ctx.fillStyle = cardData.accentColor;
       ctx.textAlign = 'center';
-      ctx.fillText(language === 'hi' ? 'धन्यवाद' : 'Thank You', dimensions.width / 2, dimensions.height / 2 - 100);
+      ctx.fillText(language === 'hi' ? 'धन्यवाद' : 'Thank You', canvasSize.width / 2, canvasSize.height / 2 - 100);
       ctx.font = `20px ${cardData.fontFamily}`;
       ctx.fillStyle = cardData.textColor;
-      ctx.fillText(language === 'hi' ? 'हमें आपका आशीर्वाद चाहिए' : 'We need your blessings', dimensions.width / 2, dimensions.height / 2 - 30);
+      ctx.fillText(language === 'hi' ? 'हमें आपका आशीर्वाद चाहिए' : 'We need your blessings', canvasSize.width / 2, canvasSize.height / 2 - 30);
       ctx.font = `16px ${cardData.fontFamily}`;
-      ctx.fillText(language === 'hi' ? 'कृपया हमारे इस खुशी के मौके पर जरूर आएं' : 'Please grace this occasion with your presence', dimensions.width / 2, dimensions.height / 2 + 20);
+      ctx.fillText(language === 'hi' ? 'कृपया हमारे इस खुशी के मौके पर जरूर आएं' : 'Please grace this occasion with your presence', canvasSize.width / 2, canvasSize.height / 2 + 20);
       ctx.font = `14px ${cardData.fontFamily}`;
       ctx.fillStyle = '#888888';
-      ctx.fillText(cardData.additionalInfo, dimensions.width / 2, dimensions.height / 2 + 80);
+      ctx.fillText(cardData.additionalInfo, canvasSize.width / 2, canvasSize.height / 2 + 80);
     };
     
     if (backImage) {
@@ -3485,7 +3447,7 @@ const WeddingCardCreator = () => {
       return;
     }
     
-    const dimensions = side === 'inside' ? getInsideDimensions() : getCurrentDimensions();
+    const dimensions = side === 'inside' ? getInsideDimensions() : canvasSize;
     const resizedBlob = await resizeImageToCanvasSize(file, dimensions.width, dimensions.height);
     const url = URL.createObjectURL(resizedBlob);
     
@@ -3510,7 +3472,7 @@ const WeddingCardCreator = () => {
   const selectTemplate = async (side, template) => {
     const response = await fetch(template.image);
     const blob = await response.blob();
-    const dimensions = side === 'inside' ? getInsideDimensions() : getCurrentDimensions();
+    const dimensions = side === 'inside' ? getInsideDimensions() : canvasSize;
     const resizedBlob = await resizeImageToCanvasSize(blob, dimensions.width, dimensions.height);
     const url = URL.createObjectURL(resizedBlob);
     
@@ -3588,7 +3550,6 @@ const WeddingCardCreator = () => {
     setLoading(true);
     setErrorMessage('');
 
-    const dimensions = getCurrentDimensions();
     const insideDimensions = getInsideDimensions();
     const formData = new FormData();
 
@@ -3600,7 +3561,7 @@ const WeddingCardCreator = () => {
     formData.append('language', language);
     formData.append('customEvents', JSON.stringify(customEvents));
     formData.append('relatives', JSON.stringify(relatives));
-    formData.append('frameSize', JSON.stringify(dimensions));
+    formData.append('canvasSize', JSON.stringify(canvasSize));
     formData.append('unit', unit);
     formData.append('design', JSON.stringify({
       backgroundColor: cardData.backgroundColor,
@@ -3613,7 +3574,7 @@ const WeddingCardCreator = () => {
     if (cardData.logo) formData.append('logo', cardData.logo);
 
     if (originalFrontFile) {
-      const blob = await resizeImageToCanvasSize(originalFrontFile, dimensions.width, dimensions.height);
+      const blob = await resizeImageToCanvasSize(originalFrontFile, canvasSize.width, canvasSize.height);
       formData.append('frontImage', blob, 'front.png');
     }
     if (originalInsideFile) {
@@ -3621,20 +3582,20 @@ const WeddingCardCreator = () => {
       formData.append('insideImage', blob, 'inside.png');
     }
     if (originalBackFile) {
-      const blob = await resizeImageToCanvasSize(originalBackFile, dimensions.width, dimensions.height);
+      const blob = await resizeImageToCanvasSize(originalBackFile, canvasSize.width, canvasSize.height);
       formData.append('backImage', blob, 'back.png');
     }
 
     // Capture front preview
     const frontBlob = await new Promise((resolve) => {
       const offscreen = document.createElement('canvas');
-      offscreen.width = dimensions.width;
-      offscreen.height = dimensions.height;
+      offscreen.width = canvasSize.width;
+      offscreen.height = canvasSize.height;
       const ctx = offscreen.getContext('2d');
 
       const drawIt = () => {
         ctx.fillStyle = cardData.backgroundColor || '#fff8f0';
-        ctx.fillRect(0, 0, dimensions.width, dimensions.height);
+        ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
 
         const frontFields = ['frontGroomName', 'frontBrideName', 'frontCeremonyDate', 'frontCeremonyVenue', 'frontCeremonyAddress'];
         frontFields.forEach(field => {
@@ -3655,7 +3616,7 @@ const WeddingCardCreator = () => {
       if (frontImage) {
         const img = new Image();
         img.crossOrigin = 'Anonymous';
-        img.onload = () => { ctx.drawImage(img, 0, 0, dimensions.width, dimensions.height); drawIt(); };
+        img.onload = () => { ctx.drawImage(img, 0, 0, canvasSize.width, canvasSize.height); drawIt(); };
         img.onerror = drawIt;
         img.src = frontImage;
       } else {
@@ -3744,7 +3705,7 @@ const WeddingCardCreator = () => {
     drawFrontCanvas();
     drawInsideCanvas();
     drawBackCanvas();
-  }, [cardData, textStyles, previewImage, logoSettings, language, customEvents, relatives, selectedFrame, customSize, unit]);
+  }, [cardData, textStyles, previewImage, logoSettings, language, customEvents, relatives, canvasSize, unit]);
 
   const frontInputRef = useRef(null);
   const insideInputRef = useRef(null);
@@ -3774,12 +3735,12 @@ const WeddingCardCreator = () => {
               {errorMessage && <Alert color="danger">{errorMessage}</Alert>}
               {successMessage && <Alert color="success">{successMessage}</Alert>}
 
-              {/* Frame Size Selection with Units */}
+              {/* Canvas Size Selection with Units - NO PRESETS */}
               <div className="mb-4 p-3 border rounded bg-light">
                 <div className="d-flex justify-content-between align-items-center mb-2">
                   <Label className="fw-bold mb-0">
                     <FaRulerCombined className="me-2" />
-                    {language === 'hi' ? 'फ्रेम साइज़' : 'Frame Size'}
+                    {language === 'hi' ? 'कैनवास साइज़' : 'Canvas Size'}
                   </Label>
                   <div className="btn-group btn-group-sm">
                     <Button color={unit === 'px' ? 'warning' : 'secondary'} onClick={() => setUnit('px')}>px</Button>
@@ -3787,49 +3748,6 @@ const WeddingCardCreator = () => {
                     <Button color={unit === 'mm' ? 'warning' : 'secondary'} onClick={() => setUnit('mm')}>mm</Button>
                   </div>
                 </div>
-                
-                <Row className="mb-2">
-                  <Col xs={6} md={3} className="mb-2">
-                    <Button 
-                      color={selectedFrame === 'a4' ? 'warning' : 'outline-warning'}
-                      size="sm"
-                      onClick={() => handleFrameSelect('a4')}
-                      className="w-100"
-                    >
-                      A4
-                    </Button>
-                  </Col>
-                  <Col xs={6} md={3} className="mb-2">
-                    <Button 
-                      color={selectedFrame === 'letter' ? 'warning' : 'outline-warning'}
-                      size="sm"
-                      onClick={() => handleFrameSelect('letter')}
-                      className="w-100"
-                    >
-                      Letter
-                    </Button>
-                  </Col>
-                  <Col xs={6} md={3} className="mb-2">
-                    <Button 
-                      color={selectedFrame === 'square' ? 'warning' : 'outline-warning'}
-                      size="sm"
-                      onClick={() => handleFrameSelect('square')}
-                      className="w-100"
-                    >
-                      Square
-                    </Button>
-                  </Col>
-                  <Col xs={6} md={3} className="mb-2">
-                    <Button 
-                      color={selectedFrame === 'wide' ? 'warning' : 'outline-warning'}
-                      size="sm"
-                      onClick={() => handleFrameSelect('wide')}
-                      className="w-100"
-                    >
-                      Wide
-                    </Button>
-                  </Col>
-                </Row>
                 
                 <Row className="align-items-end">
                   <Col xs={5}>
@@ -3846,7 +3764,7 @@ const WeddingCardCreator = () => {
                             const newValue = parseFloat(e.target.value);
                             if (!isNaN(newValue) && newValue > 0) {
                               const newWidthPx = convertToPx(newValue, unit);
-                              handleSizeChange(newWidthPx, dimensions.height);
+                              handleSizeChange(newWidthPx, canvasSize.height);
                             }
                           }}
                           step={unit === 'px' ? 10 : (unit === 'in' ? 0.1 : 2)}
@@ -3872,7 +3790,7 @@ const WeddingCardCreator = () => {
                             const newValue = parseFloat(e.target.value);
                             if (!isNaN(newValue) && newValue > 0) {
                               const newHeightPx = convertToPx(newValue, unit);
-                              handleSizeChange(dimensions.width, newHeightPx);
+                              handleSizeChange(canvasSize.width, newHeightPx);
                             }
                           }}
                           step={unit === 'px' ? 10 : (unit === 'in' ? 0.1 : 2)}
@@ -3886,39 +3804,10 @@ const WeddingCardCreator = () => {
                   </Col>
                   <Col xs={2}>
                     <div className="text-muted small text-center">
-                      {dimensions.width}×{dimensions.height}<br/>px
+                      {canvasSize.width}×{canvasSize.height}<br/>px
                     </div>
                   </Col>
                 </Row>
-                
-                {selectedFrame === 'custom' && (
-                  <Row className="mt-2">
-                    <Col xs={6}>
-                      <Input 
-                        type="number" 
-                        placeholder={language === 'hi' ? 'चौड़ाई' : 'Width'} 
-                        value={customSize.width}
-                        onChange={(e) => {
-                          const newWidth = parseInt(e.target.value);
-                          setCustomSize({ ...customSize, width: newWidth });
-                          handleSizeChange(newWidth, customSize.height);
-                        }}
-                      />
-                    </Col>
-                    <Col xs={6}>
-                      <Input 
-                        type="number" 
-                        placeholder={language === 'hi' ? 'ऊंचाई' : 'Height'} 
-                        value={customSize.height}
-                        onChange={(e) => {
-                          const newHeight = parseInt(e.target.value);
-                          setCustomSize({ ...customSize, height: newHeight });
-                          handleSizeChange(customSize.width, newHeight);
-                        }}
-                      />
-                    </Col>
-                  </Row>
-                )}
               </div>
 
               {/* All 3 Sides Thumbnails */}

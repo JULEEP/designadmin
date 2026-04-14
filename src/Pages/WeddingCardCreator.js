@@ -2701,7 +2701,7 @@
 
 
 
-// WeddingCardCreator.jsx - COMPLETE WITH UNIT SYSTEM ONLY (NO PRESETS)
+// WeddingCardCreator.jsx - COMPLETELY FIXED
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Container, Form, FormGroup, Label, Input, Button, Card, CardBody,
@@ -2715,9 +2715,8 @@ import {
   FaImages, FaCheckCircle, FaArrowsAlt, FaFillDrip, FaBold, FaItalic,
   FaUnderline, FaSquare, FaRegCircle, FaLanguage, FaGem, FaPhone,
   FaUserFriends, FaPlus, FaTimes, FaUser, FaVenusMars, FaAddressCard,
-  FaRulerCombined, FaPlus as FaPlusIcon, FaMinus
+  FaRulerCombined, FaPlus as FaPlusIcon, FaMinus, FaTrash
 } from 'react-icons/fa';
-import html2canvas from 'html2canvas';
 
 const API_URL = 'https://designback.onrender.com/api/admin';
 
@@ -2729,17 +2728,12 @@ const WeddingCardCreator = () => {
   const [language, setLanguage] = useState('en');
   const [currentSide, setCurrentSide] = useState('front');
   
-  // Unit system: 'px', 'in', 'mm'
+  // Unit system
   const [unit, setUnit] = useState('px');
-  
-  // Conversion factors
   const PX_PER_INCH = 96;
   const MM_PER_INCH = 25.4;
-  
-  // Canvas size in pixels
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 1131 });
   
-  // Get size in current unit
   const getSizeInUnit = (pxValue, targetUnit) => {
     if (targetUnit === 'px') return pxValue;
     if (targetUnit === 'in') return pxValue / PX_PER_INCH;
@@ -2747,7 +2741,6 @@ const WeddingCardCreator = () => {
     return pxValue;
   };
   
-  // Convert from unit to pixels
   const convertToPx = (value, fromUnit) => {
     if (fromUnit === 'px') return value;
     if (fromUnit === 'in') return value * PX_PER_INCH;
@@ -2755,11 +2748,10 @@ const WeddingCardCreator = () => {
     return value;
   };
   
-  // Display dimensions in current unit
   const displayWidth = getSizeInUnit(canvasSize.width, unit).toFixed(2);
   const displayHeight = getSizeInUnit(canvasSize.height, unit).toFixed(2);
   
-  // THREE SEPARATE IMAGES
+  // ========== THREE SEPARATE IMAGES WITH THEIR OWN STATES ==========
   const [frontImage, setFrontImage] = useState(null);
   const [insideImage, setInsideImage] = useState(null);
   const [backImage, setBackImage] = useState(null);
@@ -2820,32 +2812,6 @@ const WeddingCardCreator = () => {
     logo: null
   });
   
-  // Hindi translations
-  const [hindiTranslations, setHindiTranslations] = useState({
-    groomName: 'राहुल शर्मा',
-    groomFatherName: 'श्री राजेश शर्मा',
-    groomMotherName: 'श्रीमती सुमन शर्मा',
-    groomMobile: '+91 98765 43210',
-    brideName: 'प्रिया सिंह',
-    brideFatherName: 'श्री संजय सिंह',
-    brideMotherName: 'श्रीमती नेहा सिंह',
-    brideMobile: '+91 98765 43211',
-    ceremonyDate: '25 नवंबर 2025',
-    ceremonyTime: 'शाम 7:00 बजे से',
-    ceremonyVenue: 'ग्रैंड पैलेस होटल, जयपुर',
-    ceremonyAddress: 'सेक्टर 5, वैशाली नगर, जयपुर - 302021',
-    ceremonyContact: '+91 141 1234567',
-    receptionDate: '26 नवंबर 2025',
-    receptionTime: 'रात 8:00 बजे',
-    receptionVenue: 'रॉयल कन्वेंशन हॉल, जयपुर',
-    receptionAddress: 'टोंक रोड, एयरपोर्ट के पास, जयपुर - 302018',
-    receptionContact: '+91 141 7654321',
-    additionalInfo: 'भोजन एवं आशीर्वाद',
-    dressCode: 'पारंपरिक / औपचारिक',
-    rsvpContact: '+91 98765 43212',
-    rsvpBy: '15 नवंबर 2025'
-  });
-  
   // Text styles - FRONT SIDE + INSIDE SIDE both
   const [textStyles, setTextStyles] = useState({
     // FRONT SIDE FIELDS
@@ -2882,14 +2848,13 @@ const WeddingCardCreator = () => {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [selectedElement, setSelectedElement] = useState('groomName');
   
-  // Canvas refs
+  // ========== SEPARATE CANVAS REFS FOR EACH SIDE ==========
   const frontCanvasRef = useRef(null);
   const insideCanvasRef = useRef(null);
   const backCanvasRef = useRef(null);
   
   const navigate = useNavigate();
 
-  // Adjust dimensions for inside side (slightly taller)
   const getInsideDimensions = () => {
     return { width: canvasSize.width, height: canvasSize.height + 50 };
   };
@@ -2912,9 +2877,6 @@ const WeddingCardCreator = () => {
   };
 
   const getDisplayText = (field) => {
-    if (language === 'hi') {
-      return hindiTranslations[field] || cardData[field];
-    }
     return cardData[field];
   };
 
@@ -2923,10 +2885,6 @@ const WeddingCardCreator = () => {
       ...prev,
       [field]: { ...prev[field], [styleName]: value }
     }));
-    setTimeout(() => {
-      if (currentSide === 'front') drawFrontCanvas();
-      else drawInsideCanvas();
-    }, 50);
   };
 
   const updateTextPosition = (field, x, y) => {
@@ -2936,37 +2894,30 @@ const WeddingCardCreator = () => {
     }));
   };
 
-  // Add custom event
   const addCustomEvent = () => {
     if (newEvent.name) {
       setCustomEvents([...customEvents, { ...newEvent, id: Date.now() }]);
       setNewEvent({ name: '', date: '', time: '', venue: '' });
       setShowEventForm(false);
-      setTimeout(() => drawInsideCanvas(), 50);
     }
   };
 
   const removeCustomEvent = (id) => {
     setCustomEvents(customEvents.filter(e => e.id !== id));
-    setTimeout(() => drawInsideCanvas(), 50);
   };
 
-  // Add relative
   const addRelative = () => {
     if (newRelative.name) {
       setRelatives([...relatives, { ...newRelative, id: Date.now() }]);
       setNewRelative({ name: '', relation: '', side: 'groom' });
       setShowRelativeForm(false);
-      setTimeout(() => drawInsideCanvas(), 50);
     }
   };
 
   const removeRelative = (id) => {
     setRelatives(relatives.filter(r => r.id !== id));
-    setTimeout(() => drawInsideCanvas(), 50);
   };
 
-  // Resize image to fit canvas dimensions
   const resizeImageToCanvasSize = async (imageFile, targetWidth, targetHeight) => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -2987,14 +2938,12 @@ const WeddingCardCreator = () => {
     });
   };
 
-  // Handle size change with unit conversion
   const handleSizeChange = async (newWidthPx, newHeightPx) => {
     if (newWidthPx < 100 || newHeightPx < 100) return;
     
     const scaleX = newWidthPx / canvasSize.width;
     const scaleY = newHeightPx / canvasSize.height;
     
-    // Adjust text positions proportionally
     const newTextStyles = {};
     Object.keys(textStyles).forEach(key => {
       newTextStyles[key] = {
@@ -3006,7 +2955,6 @@ const WeddingCardCreator = () => {
     });
     setTextStyles(newTextStyles);
     
-    // Adjust logo position and size
     setLogoSettings(prev => ({
       ...prev,
       x: prev.x * scaleX,
@@ -3016,29 +2964,6 @@ const WeddingCardCreator = () => {
     }));
     
     setCanvasSize({ width: newWidthPx, height: newHeightPx });
-    
-    // Resize template images if they exist
-    if (frontImage && originalFrontFile) {
-      const resizedBlob = await resizeImageToCanvasSize(originalFrontFile, newWidthPx, newHeightPx);
-      const resizedUrl = URL.createObjectURL(resizedBlob);
-      setFrontImage(resizedUrl);
-      setOriginalFrontFile(new File([resizedBlob], 'front.png', { type: 'image/png' }));
-    }
-    
-    if (insideImage && originalInsideFile) {
-      const insideDims = { width: newWidthPx, height: newHeightPx + 50 };
-      const resizedBlob = await resizeImageToCanvasSize(originalInsideFile, insideDims.width, insideDims.height);
-      const resizedUrl = URL.createObjectURL(resizedBlob);
-      setInsideImage(resizedUrl);
-      setOriginalInsideFile(new File([resizedBlob], 'inside.png', { type: 'image/png' }));
-    }
-    
-    if (backImage && originalBackFile) {
-      const resizedBlob = await resizeImageToCanvasSize(originalBackFile, newWidthPx, newHeightPx);
-      const resizedUrl = URL.createObjectURL(resizedBlob);
-      setBackImage(resizedUrl);
-      setOriginalBackFile(new File([resizedBlob], 'back.png', { type: 'image/png' }));
-    }
   };
 
   const incrementSize = (dimension) => {
@@ -3063,7 +2988,7 @@ const WeddingCardCreator = () => {
     }
   };
 
-  // Draw FRONT canvas with text overlay
+  // ========== DRAW FRONT CANVAS ==========
   const drawFrontCanvas = () => {
     const canvas = frontCanvasRef.current;
     if (!canvas) return;
@@ -3072,7 +2997,6 @@ const WeddingCardCreator = () => {
     canvas.height = canvasSize.height;
     
     const drawOverlay = () => {
-      // Draw front side text fields
       const frontFields = ['frontGroomName', 'frontBrideName', 'frontCeremonyDate', 'frontCeremonyVenue', 'frontCeremonyAddress'];
       
       frontFields.forEach(field => {
@@ -3091,13 +3015,12 @@ const WeddingCardCreator = () => {
         }
       });
       
-      // Draw logo on front
       if (cardData.showLogo && previewImage && logoSettings.show) {
         drawLogoOnCanvas(ctx, previewImage, logoSettings);
       }
     };
     
-    if (frontImage) {
+    if (frontImage && frontImage !== 'placeholder') {
       const img = new Image();
       img.crossOrigin = 'Anonymous';
       img.onload = () => {
@@ -3118,7 +3041,7 @@ const WeddingCardCreator = () => {
     }
   };
 
-  // Draw INSIDE canvas with text overlay
+  // ========== DRAW INSIDE CANVAS ==========
   const drawInsideCanvas = () => {
     const canvas = insideCanvasRef.current;
     if (!canvas) return;
@@ -3128,13 +3051,11 @@ const WeddingCardCreator = () => {
     canvas.height = dimensions.height;
     
     const drawOverlay = () => {
-      // Header
       ctx.font = `italic 28px ${cardData.fontFamily}`;
       ctx.fillStyle = cardData.accentColor;
       ctx.textAlign = 'center';
       ctx.fillText(language === 'hi' ? 'विवाह निमंत्रण' : 'WEDDING INVITATION', dimensions.width / 2, 80);
       
-      // Draw all text fields
       const allFields = [
         'groomName', 'groomFatherName', 'groomMotherName', 'groomMobile',
         'brideName', 'brideFatherName', 'brideMotherName', 'brideMobile',
@@ -3217,7 +3138,6 @@ const WeddingCardCreator = () => {
         }
       }
       
-      // RSVP
       if (cardData.rsvpContact) {
         let rsvpY = dimensions.height - 30;
         ctx.font = `14px ${cardData.fontFamily}`;
@@ -3226,7 +3146,7 @@ const WeddingCardCreator = () => {
       }
     };
     
-    if (insideImage) {
+    if (insideImage && insideImage !== 'placeholder') {
       const img = new Image();
       img.crossOrigin = 'Anonymous';
       img.onload = () => {
@@ -3247,6 +3167,7 @@ const WeddingCardCreator = () => {
     }
   };
 
+  // ========== DRAW BACK CANVAS ==========
   const drawBackCanvas = () => {
     const canvas = backCanvasRef.current;
     if (!canvas) return;
@@ -3254,7 +3175,7 @@ const WeddingCardCreator = () => {
     canvas.width = canvasSize.width;
     canvas.height = canvasSize.height;
     
-    const drawBackText = (ctx) => {
+    const drawBackText = () => {
       ctx.font = `bold 32px ${cardData.fontFamily}`;
       ctx.fillStyle = cardData.accentColor;
       ctx.textAlign = 'center';
@@ -3269,19 +3190,19 @@ const WeddingCardCreator = () => {
       ctx.fillText(cardData.additionalInfo, canvasSize.width / 2, canvasSize.height / 2 + 80);
     };
     
-    if (backImage) {
+    if (backImage && backImage !== 'placeholder') {
       const img = new Image();
       img.crossOrigin = 'Anonymous';
       img.onload = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        drawBackText(ctx);
+        drawBackText();
       };
       img.src = backImage;
     } else {
       ctx.fillStyle = cardData.backgroundColor || '#fff8f0';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      drawBackText(ctx);
+      drawBackText();
     }
   };
 
@@ -3357,7 +3278,9 @@ const WeddingCardCreator = () => {
 
   // Drag handlers
   const handleCanvasMouseDown = (e) => {
-    const canvas = currentSide === 'front' ? frontCanvasRef.current : insideCanvasRef.current;
+    const canvas = currentSide === 'front' ? frontCanvasRef.current : 
+                   currentSide === 'inside' ? insideCanvasRef.current : 
+                   backCanvasRef.current;
     if (!canvas) return;
     
     const rect = canvas.getBoundingClientRect();
@@ -3369,7 +3292,7 @@ const WeddingCardCreator = () => {
     let allFields = [];
     if (currentSide === 'front') {
       allFields = ['frontGroomName', 'frontBrideName', 'frontCeremonyDate', 'frontCeremonyVenue', 'frontCeremonyAddress'];
-    } else {
+    } else if (currentSide === 'inside') {
       allFields = [
         'groomName', 'groomFatherName', 'groomMotherName', 'groomMobile',
         'brideName', 'brideFatherName', 'brideMotherName', 'brideMobile',
@@ -3377,6 +3300,8 @@ const WeddingCardCreator = () => {
         'receptionDate', 'receptionTime', 'receptionVenue', 'receptionAddress',
         'dressCode'
       ];
+    } else {
+      return;
     }
     
     for (const field of allFields) {
@@ -3415,7 +3340,9 @@ const WeddingCardCreator = () => {
   const handleCanvasMouseMove = (e) => {
     if (!isDragging || !dragTarget) return;
     
-    const canvas = currentSide === 'front' ? frontCanvasRef.current : insideCanvasRef.current;
+    const canvas = currentSide === 'front' ? frontCanvasRef.current : 
+                   currentSide === 'inside' ? insideCanvasRef.current : 
+                   backCanvasRef.current;
     if (!canvas) return;
     
     const rect = canvas.getBoundingClientRect();
@@ -3429,7 +3356,7 @@ const WeddingCardCreator = () => {
       const newY = mouseY - dragStart.y;
       updateTextPosition(dragTarget.field, newX, newY);
       if (currentSide === 'front') drawFrontCanvas();
-      else drawInsideCanvas();
+      else if (currentSide === 'inside') drawInsideCanvas();
     }
   };
   
@@ -3438,8 +3365,8 @@ const WeddingCardCreator = () => {
     setDragTarget(null);
   };
 
-  // SINGLE UPLOAD HANDLER
-  const handleFileUpload = async (side, e) => {
+  // ========== FILE UPLOAD HANDLERS - SEPARATE FOR EACH SIDE ==========
+  const handleFrontUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
@@ -3447,51 +3374,73 @@ const WeddingCardCreator = () => {
       return;
     }
     
-    const dimensions = side === 'inside' ? getInsideDimensions() : canvasSize;
-    const resizedBlob = await resizeImageToCanvasSize(file, dimensions.width, dimensions.height);
+    const resizedBlob = await resizeImageToCanvasSize(file, canvasSize.width, canvasSize.height);
     const url = URL.createObjectURL(resizedBlob);
-    
-    if (side === 'front') {
-      setFrontImage(url);
-      setOriginalFrontFile(new File([resizedBlob], 'front.png', { type: 'image/png' }));
-      setShowFrontPicker(false);
-      setTimeout(() => drawFrontCanvas(), 100);
-    } else if (side === 'inside') {
-      setInsideImage(url);
-      setOriginalInsideFile(new File([resizedBlob], 'inside.png', { type: 'image/png' }));
-      setShowInsidePicker(false);
-      setTimeout(() => drawInsideCanvas(), 100);
-    } else {
-      setBackImage(url);
-      setOriginalBackFile(new File([resizedBlob], 'back.png', { type: 'image/png' }));
-      setShowBackPicker(false);
-      setTimeout(() => drawBackCanvas(), 100);
-    }
+    setFrontImage(url);
+    setOriginalFrontFile(new File([resizedBlob], 'front.png', { type: 'image/png' }));
+    setShowFrontPicker(false);
   };
 
-  const selectTemplate = async (side, template) => {
+  const handleInsideUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMessage('Image size should be less than 5MB');
+      return;
+    }
+    
+    const dimensions = getInsideDimensions();
+    const resizedBlob = await resizeImageToCanvasSize(file, dimensions.width, dimensions.height);
+    const url = URL.createObjectURL(resizedBlob);
+    setInsideImage(url);
+    setOriginalInsideFile(new File([resizedBlob], 'inside.png', { type: 'image/png' }));
+    setShowInsidePicker(false);
+  };
+
+  const handleBackUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMessage('Image size should be less than 5MB');
+      return;
+    }
+    
+    const resizedBlob = await resizeImageToCanvasSize(file, canvasSize.width, canvasSize.height);
+    const url = URL.createObjectURL(resizedBlob);
+    setBackImage(url);
+    setOriginalBackFile(new File([resizedBlob], 'back.png', { type: 'image/png' }));
+    setShowBackPicker(false);
+  };
+
+  const selectFrontTemplate = async (template) => {
     const response = await fetch(template.image);
     const blob = await response.blob();
-    const dimensions = side === 'inside' ? getInsideDimensions() : canvasSize;
+    const resizedBlob = await resizeImageToCanvasSize(blob, canvasSize.width, canvasSize.height);
+    const url = URL.createObjectURL(resizedBlob);
+    setFrontImage(url);
+    setOriginalFrontFile(new File([resizedBlob], 'template.png', { type: 'image/png' }));
+    setShowFrontPicker(false);
+  };
+
+  const selectInsideTemplate = async (template) => {
+    const response = await fetch(template.image);
+    const blob = await response.blob();
+    const dimensions = getInsideDimensions();
     const resizedBlob = await resizeImageToCanvasSize(blob, dimensions.width, dimensions.height);
     const url = URL.createObjectURL(resizedBlob);
-    
-    if (side === 'front') {
-      setFrontImage(url);
-      setOriginalFrontFile(new File([resizedBlob], 'template.png', { type: 'image/png' }));
-      setShowFrontPicker(false);
-      setTimeout(() => drawFrontCanvas(), 100);
-    } else if (side === 'inside') {
-      setInsideImage(url);
-      setOriginalInsideFile(new File([resizedBlob], 'template.png', { type: 'image/png' }));
-      setShowInsidePicker(false);
-      setTimeout(() => drawInsideCanvas(), 100);
-    } else {
-      setBackImage(url);
-      setOriginalBackFile(new File([resizedBlob], 'template.png', { type: 'image/png' }));
-      setShowBackPicker(false);
-      setTimeout(() => drawBackCanvas(), 100);
-    }
+    setInsideImage(url);
+    setOriginalInsideFile(new File([resizedBlob], 'template.png', { type: 'image/png' }));
+    setShowInsidePicker(false);
+  };
+
+  const selectBackTemplate = async (template) => {
+    const response = await fetch(template.image);
+    const blob = await response.blob();
+    const resizedBlob = await resizeImageToCanvasSize(blob, canvasSize.width, canvasSize.height);
+    const url = URL.createObjectURL(resizedBlob);
+    setBackImage(url);
+    setOriginalBackFile(new File([resizedBlob], 'template.png', { type: 'image/png' }));
+    setShowBackPicker(false);
   };
 
   const handleLogoChange = (e) => {
@@ -3503,7 +3452,6 @@ const WeddingCardCreator = () => {
     }
     setCardData({ ...cardData, logo: file });
     setPreviewImage(URL.createObjectURL(file));
-    setTimeout(() => drawFrontCanvas(), 100);
   };
 
   const downloadCard = () => {
@@ -3545,6 +3493,24 @@ const WeddingCardCreator = () => {
     }, 1000);
   };
 
+  const removeFrontImage = () => {
+    setFrontImage(null);
+    setOriginalFrontFile(null);
+    drawFrontCanvas();
+  };
+
+  const removeInsideImage = () => {
+    setInsideImage(null);
+    setOriginalInsideFile(null);
+    drawInsideCanvas();
+  };
+
+  const removeBackImage = () => {
+    setBackImage(null);
+    setOriginalBackFile(null);
+    drawBackCanvas();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -3573,6 +3539,7 @@ const WeddingCardCreator = () => {
 
     if (cardData.logo) formData.append('logo', cardData.logo);
 
+    // Append original files - EACH SIDE SEPARATELY
     if (originalFrontFile) {
       const blob = await resizeImageToCanvasSize(originalFrontFile, canvasSize.width, canvasSize.height);
       formData.append('frontImage', blob, 'front.png');
@@ -3586,104 +3553,18 @@ const WeddingCardCreator = () => {
       formData.append('backImage', blob, 'back.png');
     }
 
-    // Capture front preview
-    const frontBlob = await new Promise((resolve) => {
-      const offscreen = document.createElement('canvas');
-      offscreen.width = canvasSize.width;
-      offscreen.height = canvasSize.height;
-      const ctx = offscreen.getContext('2d');
-
-      const drawIt = () => {
-        ctx.fillStyle = cardData.backgroundColor || '#fff8f0';
-        ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
-
-        const frontFields = ['frontGroomName', 'frontBrideName', 'frontCeremonyDate', 'frontCeremonyVenue', 'frontCeremonyAddress'];
-        frontFields.forEach(field => {
-          const style = textStyles[field];
-          if (!style?.show) return;
-          let text = '';
-          if (field === 'frontGroomName') text = cardData.groomName;
-          else if (field === 'frontBrideName') text = cardData.brideName;
-          else if (field === 'frontCeremonyDate') text = cardData.ceremonyDate;
-          else if (field === 'frontCeremonyVenue') text = cardData.ceremonyVenue;
-          else if (field === 'frontCeremonyAddress') text = cardData.ceremonyAddress;
-          if (text) drawTextAtPosition(ctx, text, style, cardData.fontFamily, style.x, style.y);
-        });
-
-        setTimeout(() => offscreen.toBlob(resolve, 'image/png'), 200);
-      };
-
-      if (frontImage) {
-        const img = new Image();
-        img.crossOrigin = 'Anonymous';
-        img.onload = () => { ctx.drawImage(img, 0, 0, canvasSize.width, canvasSize.height); drawIt(); };
-        img.onerror = drawIt;
-        img.src = frontImage;
-      } else {
-        drawIt();
-      }
-    });
-
-    if (frontBlob && frontBlob.size > 1000) {
-      formData.append('frontPreview', frontBlob, 'front_preview.png');
+    // Capture previews
+    if (frontCanvasRef.current) {
+      const frontBlob = await new Promise(r => frontCanvasRef.current.toBlob(r, 'image/png'));
+      if (frontBlob) formData.append('frontPreview', frontBlob, 'front_preview.png');
     }
-
-    // Capture inside preview
-    const insideBlob = await new Promise((resolve) => {
-      const offscreen = document.createElement('canvas');
-      offscreen.width = insideDimensions.width;
-      offscreen.height = insideDimensions.height;
-      const ctx = offscreen.getContext('2d');
-
-      const drawIt = () => {
-        ctx.fillStyle = cardData.backgroundColor || '#fff8f0';
-        ctx.fillRect(0, 0, insideDimensions.width, insideDimensions.height);
-
-        ctx.font = `italic 28px ${cardData.fontFamily}`;
-        ctx.fillStyle = cardData.accentColor;
-        ctx.textAlign = 'center';
-        ctx.fillText(language === 'hi' ? 'विवाह निमंत्रण' : 'WEDDING INVITATION', insideDimensions.width / 2, 80);
-
-        const allFields = [
-          'groomName','groomFatherName','groomMotherName','groomMobile',
-          'brideName','brideFatherName','brideMotherName','brideMobile',
-          'ceremonyDate','ceremonyTime','ceremonyVenue','ceremonyAddress',
-          'receptionDate','receptionTime','receptionVenue','receptionAddress','dressCode'
-        ];
-        allFields.forEach(field => {
-          const style = textStyles[field];
-          if (style?.show) {
-            const text = cardData[field];
-            if (text) drawTextAtPosition(ctx, text, style, cardData.fontFamily, style.x, style.y);
-          }
-        });
-
-        setTimeout(() => offscreen.toBlob(resolve, 'image/png'), 200);
-      };
-
-      if (insideImage) {
-        const img = new Image();
-        img.crossOrigin = 'Anonymous';
-        img.onload = () => { ctx.drawImage(img, 0, 0, insideDimensions.width, insideDimensions.height); drawIt(); };
-        img.onerror = drawIt;
-        img.src = insideImage;
-      } else {
-        drawIt();
-      }
-    });
-
-    if (insideBlob && insideBlob.size > 1000) {
-      formData.append('insidePreview', insideBlob, 'inside_preview.png');
+    if (insideCanvasRef.current) {
+      const insideBlob = await new Promise(r => insideCanvasRef.current.toBlob(r, 'image/png'));
+      if (insideBlob) formData.append('insidePreview', insideBlob, 'inside_preview.png');
     }
-
-    // Back preview
     if (backCanvasRef.current) {
-      drawBackCanvas();
-      await new Promise(r => setTimeout(r, 300));
       const backBlob = await new Promise(r => backCanvasRef.current.toBlob(r, 'image/png'));
-      if (backBlob && backBlob.size > 1000) {
-        formData.append('backPreview', backBlob, 'back_preview.png');
-      }
+      if (backBlob) formData.append('backPreview', backBlob, 'back_preview.png');
     }
 
     try {
@@ -3700,12 +3581,12 @@ const WeddingCardCreator = () => {
     }
   };
 
-  // Redraw canvases
+  // Redraw canvases when dependencies change
   useEffect(() => {
     drawFrontCanvas();
     drawInsideCanvas();
     drawBackCanvas();
-  }, [cardData, textStyles, previewImage, logoSettings, language, customEvents, relatives, canvasSize, unit]);
+  }, [cardData, textStyles, previewImage, logoSettings, language, customEvents, relatives, canvasSize, frontImage, insideImage, backImage]);
 
   const frontInputRef = useRef(null);
   const insideInputRef = useRef(null);
@@ -3735,7 +3616,7 @@ const WeddingCardCreator = () => {
               {errorMessage && <Alert color="danger">{errorMessage}</Alert>}
               {successMessage && <Alert color="success">{successMessage}</Alert>}
 
-              {/* Canvas Size Selection with Units - NO PRESETS */}
+              {/* Canvas Size Selection */}
               <div className="mb-4 p-3 border rounded bg-light">
                 <div className="d-flex justify-content-between align-items-center mb-2">
                   <Label className="fw-bold mb-0">
@@ -3810,47 +3691,44 @@ const WeddingCardCreator = () => {
                 </Row>
               </div>
 
-              {/* All 3 Sides Thumbnails */}
+              {/* Side Selection Buttons */}
               <div className="mb-4">
-                <Label className="fw-bold mb-2"><FaGem className="me-2" />All Card Sides (Click to Edit)</Label>
                 <Row>
                   <Col md={4}>
-                    <Card className={`text-center ${currentSide === 'front' ? 'border-warning border-3' : ''}`} style={{ cursor: 'pointer' }} onClick={() => setCurrentSide('front')}>
-                      <CardBody className="p-2">
-                        <small className="text-primary">Front Side</small>
-                        <div style={{ height: '120px', overflow: 'hidden' }}>
-                          <canvas ref={frontCanvasRef} style={{ width: '100%', height: 'auto' }} />
-                        </div>
-                      </CardBody>
-                    </Card>
+                    <Button 
+                      color={currentSide === 'front' ? 'warning' : 'light'} 
+                      className="w-100 mb-2"
+                      onClick={() => setCurrentSide('front')}
+                    >
+                      <FaHeart /> Front Side
+                    </Button>
                   </Col>
                   <Col md={4}>
-                    <Card className={`text-center ${currentSide === 'inside' ? 'border-warning border-3' : ''}`} style={{ cursor: 'pointer' }} onClick={() => setCurrentSide('inside')}>
-                      <CardBody className="p-2">
-                        <small className="text-primary">Inside Side</small>
-                        <div style={{ height: '120px', overflow: 'hidden' }}>
-                          <canvas ref={insideCanvasRef} style={{ width: '100%', height: 'auto' }} />
-                        </div>
-                      </CardBody>
-                    </Card>
+                    <Button 
+                      color={currentSide === 'inside' ? 'warning' : 'light'} 
+                      className="w-100 mb-2"
+                      onClick={() => setCurrentSide('inside')}
+                    >
+                      <FaGem /> Inside Side
+                    </Button>
                   </Col>
                   <Col md={4}>
-                    <Card className={`text-center ${currentSide === 'back' ? 'border-warning border-3' : ''}`} style={{ cursor: 'pointer' }} onClick={() => setCurrentSide('back')}>
-                      <CardBody className="p-2">
-                        <small className="text-primary">Back Side</small>
-                        <div style={{ height: '120px', overflow: 'hidden' }}>
-                          <canvas ref={backCanvasRef} style={{ width: '100%', height: 'auto' }} />
-                        </div>
-                      </CardBody>
-                    </Card>
+                    <Button 
+                      color={currentSide === 'back' ? 'warning' : 'light'} 
+                      className="w-100 mb-2"
+                      onClick={() => setCurrentSide('back')}
+                    >
+                      <FaCheckCircle /> Back Side
+                    </Button>
                   </Col>
                 </Row>
               </div>
 
-              {/* Template Upload - SINGLE UPLOAD */}
+              {/* Template Upload - SEPARATE FOR EACH SIDE */}
               <div className="mb-4 p-3 border rounded bg-light">
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <Label className="fw-bold mb-0"><FaImages className="me-2" />
+                  <Label className="fw-bold mb-0">
+                    <FaImages className="me-2" />
                     {currentSide === 'front' ? 'Front Template' : currentSide === 'inside' ? 'Inside Template' : 'Back Template'}
                   </Label>
                   <Button size="sm" color="warning" onClick={() => {
@@ -3862,16 +3740,42 @@ const WeddingCardCreator = () => {
                   </Button>
                 </div>
                 
-                {(currentSide === 'front' && showFrontPicker) && (
+                {/* Current Image Preview with Remove Option */}
+                {(currentSide === 'front' && frontImage) && (
+                  <div className="mb-2 position-relative">
+                    <img src={frontImage} alt="Front" style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '8px' }} />
+                    <Button size="sm" color="danger" onClick={removeFrontImage} style={{ position: 'absolute', top: '5px', right: '5px' }}>
+                      <FaTrash /> Remove
+                    </Button>
+                  </div>
+                )}
+                {(currentSide === 'inside' && insideImage) && (
+                  <div className="mb-2 position-relative">
+                    <img src={insideImage} alt="Inside" style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '8px' }} />
+                    <Button size="sm" color="danger" onClick={removeInsideImage} style={{ position: 'absolute', top: '5px', right: '5px' }}>
+                      <FaTrash /> Remove
+                    </Button>
+                  </div>
+                )}
+                {(currentSide === 'back' && backImage) && (
+                  <div className="mb-2 position-relative">
+                    <img src={backImage} alt="Back" style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '8px' }} />
+                    <Button size="sm" color="danger" onClick={removeBackImage} style={{ position: 'absolute', top: '5px', right: '5px' }}>
+                      <FaTrash /> Remove
+                    </Button>
+                  </div>
+                )}
+                
+                {currentSide === 'front' && showFrontPicker && (
                   <div className="mt-2">
-                    <input ref={frontInputRef} type="file" hidden onChange={(e) => handleFileUpload('front', e)} accept="image/*" />
+                    <input ref={frontInputRef} type="file" hidden onChange={handleFrontUpload} accept="image/*" />
                     <Button size="sm" color="secondary" onClick={() => frontInputRef.current?.click()} className="w-100 mb-2">
                       <FaCloudUploadAlt /> Upload Custom Template
                     </Button>
                     <div className="row">
                       {sampleTemplates.front.map(template => (
                         <div key={template.id} className="col-6 col-md-3 mb-2">
-                          <div className="border rounded p-1 text-center" style={{ cursor: 'pointer' }} onClick={() => selectTemplate('front', template)}>
+                          <div className="border rounded p-1 text-center" style={{ cursor: 'pointer' }} onClick={() => selectFrontTemplate(template)}>
                             <img src={template.image} alt={template.name} style={{ width: '100%', height: '60px', objectFit: 'cover' }} />
                             <small>{template.name}</small>
                           </div>
@@ -3881,16 +3785,16 @@ const WeddingCardCreator = () => {
                   </div>
                 )}
                 
-                {(currentSide === 'inside' && showInsidePicker) && (
+                {currentSide === 'inside' && showInsidePicker && (
                   <div className="mt-2">
-                    <input ref={insideInputRef} type="file" hidden onChange={(e) => handleFileUpload('inside', e)} accept="image/*" />
+                    <input ref={insideInputRef} type="file" hidden onChange={handleInsideUpload} accept="image/*" />
                     <Button size="sm" color="secondary" onClick={() => insideInputRef.current?.click()} className="w-100 mb-2">
                       <FaCloudUploadAlt /> Upload Custom Template
                     </Button>
                     <div className="row">
                       {sampleTemplates.inside.map(template => (
                         <div key={template.id} className="col-6 col-md-3 mb-2">
-                          <div className="border rounded p-1 text-center" style={{ cursor: 'pointer' }} onClick={() => selectTemplate('inside', template)}>
+                          <div className="border rounded p-1 text-center" style={{ cursor: 'pointer' }} onClick={() => selectInsideTemplate(template)}>
                             <img src={template.image} alt={template.name} style={{ width: '100%', height: '60px', objectFit: 'cover' }} />
                             <small>{template.name}</small>
                           </div>
@@ -3900,16 +3804,16 @@ const WeddingCardCreator = () => {
                   </div>
                 )}
                 
-                {(currentSide === 'back' && showBackPicker) && (
+                {currentSide === 'back' && showBackPicker && (
                   <div className="mt-2">
-                    <input ref={backInputRef} type="file" hidden onChange={(e) => handleFileUpload('back', e)} accept="image/*" />
+                    <input ref={backInputRef} type="file" hidden onChange={handleBackUpload} accept="image/*" />
                     <Button size="sm" color="secondary" onClick={() => backInputRef.current?.click()} className="w-100 mb-2">
                       <FaCloudUploadAlt /> Upload Custom Template
                     </Button>
                     <div className="row">
                       {sampleTemplates.back.map(template => (
                         <div key={template.id} className="col-6 col-md-3 mb-2">
-                          <div className="border rounded p-1 text-center" style={{ cursor: 'pointer' }} onClick={() => selectTemplate('back', template)}>
+                          <div className="border rounded p-1 text-center" style={{ cursor: 'pointer' }} onClick={() => selectBackTemplate(template)}>
                             <img src={template.image} alt={template.name} style={{ width: '100%', height: '60px', objectFit: 'cover' }} />
                             <small>{template.name}</small>
                           </div>
@@ -3932,43 +3836,44 @@ const WeddingCardCreator = () => {
                   <TabPane tabId="1">
                     <h6 className="text-warning mb-3"><FaUser /> Groom Details</h6>
                     <Row>
-                      <Col md={6}><FormGroup><Label>Groom Name</Label><Input value={cardData.groomName} onChange={e => { setCardData({...cardData, groomName: e.target.value}); drawFrontCanvas(); drawInsideCanvas(); }} /></FormGroup></Col>
-                      <Col md={6}><FormGroup><Label>Groom Father's Name</Label><Input value={cardData.groomFatherName} onChange={e => { setCardData({...cardData, groomFatherName: e.target.value}); drawInsideCanvas(); }} /></FormGroup></Col>
-                      <Col md={6}><FormGroup><Label>Groom Mother's Name</Label><Input value={cardData.groomMotherName} onChange={e => { setCardData({...cardData, groomMotherName: e.target.value}); drawInsideCanvas(); }} /></FormGroup></Col>
-                      <Col md={6}><FormGroup><Label><FaPhone /> Groom Mobile</Label><Input value={cardData.groomMobile} onChange={e => { setCardData({...cardData, groomMobile: e.target.value}); drawInsideCanvas(); }} /></FormGroup></Col>
+                      <Col md={6}><FormGroup><Label>Groom Name</Label><Input value={cardData.groomName} onChange={e => setCardData({...cardData, groomName: e.target.value})} /></FormGroup></Col>
+                      <Col md={6}><FormGroup><Label>Groom Father's Name</Label><Input value={cardData.groomFatherName} onChange={e => setCardData({...cardData, groomFatherName: e.target.value})} /></FormGroup></Col>
+                      <Col md={6}><FormGroup><Label>Groom Mother's Name</Label><Input value={cardData.groomMotherName} onChange={e => setCardData({...cardData, groomMotherName: e.target.value})} /></FormGroup></Col>
+                      <Col md={6}><FormGroup><Label><FaPhone /> Groom Mobile</Label><Input value={cardData.groomMobile} onChange={e => setCardData({...cardData, groomMobile: e.target.value})} /></FormGroup></Col>
                     </Row>
                     
                     <h6 className="text-warning mb-3 mt-3"><FaVenusMars /> Bride Details</h6>
                     <Row>
-                      <Col md={6}><FormGroup><Label>Bride Name</Label><Input value={cardData.brideName} onChange={e => { setCardData({...cardData, brideName: e.target.value}); drawFrontCanvas(); drawInsideCanvas(); }} /></FormGroup></Col>
-                      <Col md={6}><FormGroup><Label>Bride Father's Name</Label><Input value={cardData.brideFatherName} onChange={e => { setCardData({...cardData, brideFatherName: e.target.value}); drawInsideCanvas(); }} /></FormGroup></Col>
-                      <Col md={6}><FormGroup><Label>Bride Mother's Name</Label><Input value={cardData.brideMotherName} onChange={e => { setCardData({...cardData, brideMotherName: e.target.value}); drawInsideCanvas(); }} /></FormGroup></Col>
-                      <Col md={6}><FormGroup><Label><FaPhone /> Bride Mobile</Label><Input value={cardData.brideMobile} onChange={e => { setCardData({...cardData, brideMobile: e.target.value}); drawInsideCanvas(); }} /></FormGroup></Col>
+                      <Col md={6}><FormGroup><Label>Bride Name</Label><Input value={cardData.brideName} onChange={e => setCardData({...cardData, brideName: e.target.value})} /></FormGroup></Col>
+                      <Col md={6}><FormGroup><Label>Bride Father's Name</Label><Input value={cardData.brideFatherName} onChange={e => setCardData({...cardData, brideFatherName: e.target.value})} /></FormGroup></Col>
+                      <Col md={6}><FormGroup><Label>Bride Mother's Name</Label><Input value={cardData.brideMotherName} onChange={e => setCardData({...cardData, brideMotherName: e.target.value})} /></FormGroup></Col>
+                      <Col md={6}><FormGroup><Label><FaPhone /> Bride Mobile</Label><Input value={cardData.brideMobile} onChange={e => setCardData({...cardData, brideMobile: e.target.value})} /></FormGroup></Col>
                     </Row>
                     
                     <h6 className="text-warning mb-3 mt-3"><FaCalendarAlt /> Wedding Ceremony</h6>
                     <Row>
-                      <Col md={6}><FormGroup><Label>Ceremony Date</Label><Input value={cardData.ceremonyDate} onChange={e => { setCardData({...cardData, ceremonyDate: e.target.value}); drawFrontCanvas(); drawInsideCanvas(); }} /></FormGroup></Col>
-                      <Col md={6}><FormGroup><Label>Ceremony Time</Label><Input value={cardData.ceremonyTime} onChange={e => { setCardData({...cardData, ceremonyTime: e.target.value}); drawInsideCanvas(); }} /></FormGroup></Col>
-                      <Col md={12}><FormGroup><Label>Ceremony Venue</Label><Input value={cardData.ceremonyVenue} onChange={e => { setCardData({...cardData, ceremonyVenue: e.target.value}); drawFrontCanvas(); drawInsideCanvas(); }} /></FormGroup></Col>
-                      <Col md={12}><FormGroup><Label>Ceremony Address</Label><Input value={cardData.ceremonyAddress} onChange={e => { setCardData({...cardData, ceremonyAddress: e.target.value}); drawFrontCanvas(); drawInsideCanvas(); }} /></FormGroup></Col>
-                      <Col md={12}><FormGroup><Label><FaPhone /> Ceremony Contact</Label><Input value={cardData.ceremonyContact} onChange={e => { setCardData({...cardData, ceremonyContact: e.target.value}); drawInsideCanvas(); }} /></FormGroup></Col>
+                      <Col md={6}><FormGroup><Label>Ceremony Date</Label><Input value={cardData.ceremonyDate} onChange={e => setCardData({...cardData, ceremonyDate: e.target.value})} /></FormGroup></Col>
+                      <Col md={6}><FormGroup><Label>Ceremony Time</Label><Input value={cardData.ceremonyTime} onChange={e => setCardData({...cardData, ceremonyTime: e.target.value})} /></FormGroup></Col>
+                      <Col md={12}><FormGroup><Label>Ceremony Venue</Label><Input value={cardData.ceremonyVenue} onChange={e => setCardData({...cardData, ceremonyVenue: e.target.value})} /></FormGroup></Col>
+                      <Col md={12}><FormGroup><Label>Ceremony Address</Label><Input value={cardData.ceremonyAddress} onChange={e => setCardData({...cardData, ceremonyAddress: e.target.value})} /></FormGroup></Col>
+                      <Col md={12}><FormGroup><Label><FaPhone /> Ceremony Contact</Label><Input value={cardData.ceremonyContact} onChange={e => setCardData({...cardData, ceremonyContact: e.target.value})} /></FormGroup></Col>
                     </Row>
                     
+                    <h6 className="text-warning mb-3 mt-3"><FaCalendarAlt /> Reception</h6>
                     <Row>
-                      <Col md={6}><FormGroup><Label>Reception Date</Label><Input value={cardData.receptionDate} onChange={e => { setCardData({...cardData, receptionDate: e.target.value}); drawInsideCanvas(); }} /></FormGroup></Col>
-                      <Col md={6}><FormGroup><Label>Reception Time</Label><Input value={cardData.receptionTime} onChange={e => { setCardData({...cardData, receptionTime: e.target.value}); drawInsideCanvas(); }} /></FormGroup></Col>
-                      <Col md={12}><FormGroup><Label>Reception Venue</Label><Input value={cardData.receptionVenue} onChange={e => { setCardData({...cardData, receptionVenue: e.target.value}); drawInsideCanvas(); }} /></FormGroup></Col>
-                      <Col md={12}><FormGroup><Label>Reception Address</Label><Input value={cardData.receptionAddress} onChange={e => { setCardData({...cardData, receptionAddress: e.target.value}); drawInsideCanvas(); }} /></FormGroup></Col>
-                      <Col md={12}><FormGroup><Label><FaPhone /> Reception Contact</Label><Input value={cardData.receptionContact} onChange={e => { setCardData({...cardData, receptionContact: e.target.value}); drawInsideCanvas(); }} /></FormGroup></Col>
+                      <Col md={6}><FormGroup><Label>Reception Date</Label><Input value={cardData.receptionDate} onChange={e => setCardData({...cardData, receptionDate: e.target.value})} /></FormGroup></Col>
+                      <Col md={6}><FormGroup><Label>Reception Time</Label><Input value={cardData.receptionTime} onChange={e => setCardData({...cardData, receptionTime: e.target.value})} /></FormGroup></Col>
+                      <Col md={12}><FormGroup><Label>Reception Venue</Label><Input value={cardData.receptionVenue} onChange={e => setCardData({...cardData, receptionVenue: e.target.value})} /></FormGroup></Col>
+                      <Col md={12}><FormGroup><Label>Reception Address</Label><Input value={cardData.receptionAddress} onChange={e => setCardData({...cardData, receptionAddress: e.target.value})} /></FormGroup></Col>
+                      <Col md={12}><FormGroup><Label><FaPhone /> Reception Contact</Label><Input value={cardData.receptionContact} onChange={e => setCardData({...cardData, receptionContact: e.target.value})} /></FormGroup></Col>
                     </Row>
                     
                     <h6 className="text-warning mb-3 mt-3"><FaAddressCard /> Additional Info</h6>
                     <Row>
-                      <Col md={12}><FormGroup><Label>Additional Info</Label><Input value={cardData.additionalInfo} onChange={e => { setCardData({...cardData, additionalInfo: e.target.value}); drawBackCanvas(); }} /></FormGroup></Col>
-                      <Col md={6}><FormGroup><Label>Dress Code</Label><Input value={cardData.dressCode} onChange={e => { setCardData({...cardData, dressCode: e.target.value}); drawInsideCanvas(); }} /></FormGroup></Col>
-                      <Col md={6}><FormGroup><Label><FaPhone /> RSVP Contact</Label><Input value={cardData.rsvpContact} onChange={e => { setCardData({...cardData, rsvpContact: e.target.value}); drawInsideCanvas(); }} /></FormGroup></Col>
-                      <Col md={6}><FormGroup><Label>RSVP By Date</Label><Input value={cardData.rsvpBy} onChange={e => { setCardData({...cardData, rsvpBy: e.target.value}); drawInsideCanvas(); }} /></FormGroup></Col>
+                      <Col md={12}><FormGroup><Label>Additional Info</Label><Input value={cardData.additionalInfo} onChange={e => setCardData({...cardData, additionalInfo: e.target.value})} /></FormGroup></Col>
+                      <Col md={6}><FormGroup><Label>Dress Code</Label><Input value={cardData.dressCode} onChange={e => setCardData({...cardData, dressCode: e.target.value})} /></FormGroup></Col>
+                      <Col md={6}><FormGroup><Label><FaPhone /> RSVP Contact</Label><Input value={cardData.rsvpContact} onChange={e => setCardData({...cardData, rsvpContact: e.target.value})} /></FormGroup></Col>
+                      <Col md={6}><FormGroup><Label>RSVP By Date</Label><Input value={cardData.rsvpBy} onChange={e => setCardData({...cardData, rsvpBy: e.target.value})} /></FormGroup></Col>
                     </Row>
                   </TabPane>
 
@@ -4132,11 +4037,20 @@ const WeddingCardCreator = () => {
             <div className="modal-content bg-transparent border-0">
               <div className="modal-body">
                 <Row>
-                  <Col md={4} className="text-center mb-3"><h5 className="text-white bg-dark p-2 rounded">Front Side</h5><canvas ref={frontCanvasRef} style={{ width: '100%', height: 'auto', border: '1px solid #ddd' }} /></Col>
-                  <Col md={4} className="text-center mb-3"><h5 className="text-white bg-dark p-2 rounded">Inside Side</h5><canvas ref={insideCanvasRef} style={{ width: '100%', height: 'auto', border: '1px solid #ddd' }} /></Col>
-                  <Col md={4} className="text-center mb-3"><h5 className="text-white bg-dark p-2 rounded">Back Side</h5><canvas ref={backCanvasRef} style={{ width: '100%', height: 'auto', border: '1px solid #ddd' }} /></Col>
+                  <Col md={4} className="text-center mb-3"><h5 className="text-white bg-dark p-2 rounded">Front Side</h5>
+                    <canvas ref={frontCanvasRef} style={{ width: '100%', height: 'auto', border: '1px solid #ddd' }} />
+                  </Col>
+                  <Col md={4} className="text-center mb-3"><h5 className="text-white bg-dark p-2 rounded">Inside Side</h5>
+                    <canvas ref={insideCanvasRef} style={{ width: '100%', height: 'auto', border: '1px solid #ddd' }} />
+                  </Col>
+                  <Col md={4} className="text-center mb-3"><h5 className="text-white bg-dark p-2 rounded">Back Side</h5>
+                    <canvas ref={backCanvasRef} style={{ width: '100%', height: 'auto', border: '1px solid #ddd' }} />
+                  </Col>
                 </Row>
-                <div className="text-center mt-3"><Button color="success" onClick={downloadAllSides}><FaDownload /> Download All Sides</Button><Button color="secondary" className="ms-2" onClick={() => setShowFullPreview(false)}>Close</Button></div>
+                <div className="text-center mt-3">
+                  <Button color="success" onClick={downloadAllSides}><FaDownload /> Download All Sides</Button>
+                  <Button color="secondary" className="ms-2" onClick={() => setShowFullPreview(false)}>Close</Button>
+                </div>
               </div>
             </div>
           </div>

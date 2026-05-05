@@ -66,6 +66,14 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
       ],
     },
     {
+      icon: <i className="ri-layout-line text-xl"></i>,
+      name: "Flex Books",
+      dropdown: [
+        { name: "Create Flex Book", path: "/create-flexbook" },
+        { name: "Flex Book List", path: "/flexbooks" },
+      ],
+    },
+    {
       icon: <i className="ri-id-card-line text-xl"></i>,
       name: "Visiting Cards",
       dropdown: [
@@ -307,6 +315,7 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
         )}
       </div>
 
+      {/* CSS Styles */}
       <style jsx>{`
         @keyframes pulse {
           0%, 100% {

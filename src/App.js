@@ -98,6 +98,8 @@ import PrescriptionsList from "./Pages/PrescriptionsList.js";
 import WeddingCardsList from "./Pages/WeddingCardsList.js";
 import CreateReceipt from "./Pages/CreateReceipt.js";
 import ReceiptList from "./Pages/ReceiptList.js";
+import FlexBookCreator from "./Pages/FlexBookCreator.js";
+import FlexBookList from "./Pages/FlexBookList.js";
 
 
 
@@ -210,6 +212,8 @@ function App() {
               <Route path="/weddingcards" element={<WeddingCardsList />} />
               <Route path="/create-receipt" element={<CreateReceipt />} />
               <Route path="/receipts" element={<ReceiptList />} />
+              <Route path="/create-flexbook" element={<FlexBookCreator />} />
+              <Route path="/flexbooks" element={<FlexBookList />} />
 
 
 

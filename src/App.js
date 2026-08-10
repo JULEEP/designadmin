@@ -100,6 +100,8 @@ import CreateReceipt from "./Pages/CreateReceipt.js";
 import ReceiptList from "./Pages/ReceiptList.js";
 import FlexBookCreator from "./Pages/FlexBookCreator.js";
 import FlexBookList from "./Pages/FlexBookList.js";
+import OrderList from "./Pages/OrdersList.js";
+import DeliveryFair from "./Pages/DeliveryFair.js";
 
 
 
@@ -212,8 +214,10 @@ function App() {
               <Route path="/weddingcards" element={<WeddingCardsList />} />
               <Route path="/create-receipt" element={<CreateReceipt />} />
               <Route path="/receipts" element={<ReceiptList />} />
+              <Route path="/orderlist" element={<OrderList />} />
               <Route path="/create-flexbook" element={<FlexBookCreator />} />
               <Route path="/flexbooks" element={<FlexBookList />} />
+              <Route path="/fair" element={<DeliveryFair />} />
 
 
 

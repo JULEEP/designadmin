@@ -306,7 +306,6 @@ const ReceiptList = () => {
                 <thead className="table-light">
                   <tr>
                     <th>#</th>
-                    <th><FaHashtag /> Receipt No</th>
                     <th><FaBuilding /> Company Name</th>
                     <th><FaCalendarAlt /> Date</th>
                     <th><FaLanguage /> Language</th>
@@ -320,9 +319,8 @@ const ReceiptList = () => {
                     <tr key={receipt._id}>
                       <td>{index + 1}</td>
                       <td>
-                        <strong className="text-success">{receipt.receiptNumber}</strong>
+                        <strong>{receipt.companyName}</strong>
                       </td>
-                      <td>{receipt.companyName}</td>
                       <td>{formatDate(receipt.receiptDate)}</td>
                       <td>
                         <Badge color={receipt.language === 'hi' ? 'info' : 'primary'}>

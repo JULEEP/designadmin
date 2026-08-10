@@ -49,12 +49,16 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
     },
     {
       icon: <i className="ri-calendar-check-line text-xl"></i>,
-      name: "Bookings",
+      name: "Orders",
       dropdown: [
-        { name: "All Bookings", path: "/bookings" },
-        { name: "Pending Bookings", path: "/pending-bookings" },
-        { name: "Confirmed Bookings", path: "/confirmed-bookings" },
-        { name: "Booking Reports", path: "/booking-reports" },
+        { name: "All Orders", path: "/orderlist" },
+      ],
+    },
+    {
+      icon: <i className="ri-truck-line text-xl"></i>,
+      name: "Delivery Fair",
+      dropdown: [
+        { name: "Delivery Fair", path: "/fair" },
       ],
     },
     {

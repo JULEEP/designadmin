@@ -102,6 +102,8 @@ import FlexBookCreator from "./Pages/FlexBookCreator.js";
 import FlexBookList from "./Pages/FlexBookList.js";
 import OrderList from "./Pages/OrdersList.js";
 import DeliveryFair from "./Pages/DeliveryFair.js";
+import DeliveryBoy from "./Pages/DeliveryBoy.js";
+import Business from "./Pages/Business.js";
 
 
 
@@ -218,6 +220,8 @@ function App() {
               <Route path="/create-flexbook" element={<FlexBookCreator />} />
               <Route path="/flexbooks" element={<FlexBookList />} />
               <Route path="/fair" element={<DeliveryFair />} />
+              <Route path="/deliveryboy" element={<DeliveryBoy />} />
+              <Route path="/business" element={<Business />} />
 
 
 

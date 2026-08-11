@@ -56,9 +56,17 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
     },
     {
       icon: <i className="ri-truck-line text-xl"></i>,
-      name: "Delivery Fair",
+      name: "Delivery",
       dropdown: [
         { name: "Delivery Fair", path: "/fair" },
+        { name: "Delivery Boys", path: "/deliveryboy" },
+      ],
+    },
+    {
+      icon: <i className="ri-store-line text-xl"></i>,
+      name: "Business",
+      dropdown: [
+        { name: "Business Details", path: "/business" },
       ],
     },
     {

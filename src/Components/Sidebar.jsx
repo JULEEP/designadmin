@@ -34,6 +34,7 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
     return dropdown.some(item => location.pathname === item.path);
   };
 
+  // ✅ Elements me Stickers ka naya section add kiya hai
   const elements = [
     {
       icon: <i className="ri-dashboard-line text-xl"></i>,
@@ -67,6 +68,14 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
       name: "Business",
       dropdown: [
         { name: "Business Details", path: "/business" },
+      ],
+    },
+    // ✅ NEW STICKERS SECTION ADDED HERE
+    {
+      icon: <i className="ri-sticky-note-line text-xl"></i>, // Sticker/Note icon
+      name: "Stickers & Labels",
+      dropdown: [
+        { name: "Manage Stickers", path: "/stickers" },
       ],
     },
     {

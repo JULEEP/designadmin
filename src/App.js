@@ -104,6 +104,7 @@ import OrderList from "./Pages/OrdersList.js";
 import DeliveryFair from "./Pages/DeliveryFair.js";
 import DeliveryBoy from "./Pages/DeliveryBoy.js";
 import Business from "./Pages/Business.js";
+import StickersList from "./Pages/StickersList.js";
 
 
 
@@ -222,6 +223,7 @@ function App() {
               <Route path="/fair" element={<DeliveryFair />} />
               <Route path="/deliveryboy" element={<DeliveryBoy />} />
               <Route path="/business" element={<Business />} />
+              <Route path="/stickers" element={<StickersList />} />
 
 
 

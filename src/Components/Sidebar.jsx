@@ -34,7 +34,6 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
     return dropdown.some(item => location.pathname === item.path);
   };
 
-  // ✅ Elements me Stickers ka naya section add kiya hai
   const elements = [
     {
       icon: <i className="ri-dashboard-line text-xl"></i>,
@@ -70,14 +69,25 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
         { name: "Business Details", path: "/business" },
       ],
     },
-    // ✅ NEW STICKERS SECTION ADDED HERE
+
+    // ✅ STICKERS SECTION
     {
-      icon: <i className="ri-sticky-note-line text-xl"></i>, // Sticker/Note icon
+      icon: <i className="ri-sticky-note-line text-xl"></i>,
       name: "Stickers & Labels",
       dropdown: [
         { name: "Manage Stickers", path: "/stickers" },
       ],
     },
+
+    // ✅ NEW DOCUMENTS SECTION (Stickers jaisa)
+    {
+      icon: <i className="ri-file-list-3-line text-xl"></i>,
+      name: "Custom Documents",
+      dropdown: [
+        { name: "Manage Documents", path: "/documents" },
+      ],
+    },
+
     {
       icon: <i className="ri-file-text-line text-xl"></i>,
       name: "Bill Books",
@@ -161,7 +171,7 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
     <>
       {/* Mobile Overlay */}
       {isMobile && !isCollapsed && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
           onClick={onToggle}
         />
@@ -169,12 +179,12 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
 
       <div
         className={`fixed md:relative z-50 transition-all duration-300 ease-in-out ${
-          isMobile 
-            ? isCollapsed 
-              ? "-translate-x-full" 
+          isMobile
+            ? isCollapsed
+              ? "-translate-x-full"
               : "translate-x-0"
-            : isCollapsed 
-              ? "w-20" 
+            : isCollapsed
+              ? "w-20"
               : "w-72"
         } h-screen flex flex-col`}
         style={{
@@ -243,8 +253,8 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
                         </>
                       )}
                     </button>
-                    
-                    {/* Dropdown Menu - No underlines */}
+
+                    {/* Dropdown Menu */}
                     {openDropdown === item.name && (!isCollapsed || isMobile) && (
                       <div className="ml-9 mt-2 mb-2 space-y-1">
                         {item.dropdown.map((subItem, subIdx) => (
@@ -346,55 +356,55 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
             opacity: 1;
           }
         }
-        
+
         .animate-pulse {
           animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
-        
+
         /* Custom Scrollbar */
         .overflow-y-auto::-webkit-scrollbar {
           width: 4px;
         }
-        
+
         .overflow-y-auto::-webkit-scrollbar-track {
           background: rgba(59, 130, 246, 0.1);
           border-radius: 10px;
         }
-        
+
         .overflow-y-auto::-webkit-scrollbar-thumb {
           background: rgba(59, 130, 246, 0.3);
           border-radius: 10px;
         }
-        
+
         .overflow-y-auto::-webkit-scrollbar-thumb:hover {
           background: rgba(59, 130, 246, 0.5);
         }
-        
+
         /* Ensure all buttons and links are clickable and no underlines */
         button, a {
           cursor: pointer;
           user-select: none;
           text-decoration: none !important;
         }
-        
+
         a:hover, a:focus, a:active {
           text-decoration: none !important;
         }
-        
+
         /* Remove any pointer-events issues */
         .fixed, .relative, .absolute {
           pointer-events: auto;
         }
-        
+
         /* Ensure z-index properly set */
         .z-50 {
           z-index: 50;
         }
-        
+
         .z-40 {
           z-index: 40;
         }
-        
+
         /* Remove any default link styles */
         a:link, a:visited, a:hover, a:active {
           text-decoration: none !important;

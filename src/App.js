@@ -110,6 +110,8 @@ import LetterheadsList from "./Pages/LetterheadsAdmin.js";
 import EnveLopesList from "./Pages/EnvelopesAdmin.js";
 import BrochuresAdmin from "./Pages/BrochuresAdmin.js";
 import RegistersAdmin from "./Pages/RegistersAdmin.js";
+import BookletsAdmin from "./Pages/BookletsAdmin.js";
+import PrintedFilesAdmin from "./Pages/PrintedFilesAdmin.js";
 
 function App() {
   return (
@@ -231,6 +233,10 @@ function App() {
               <Route path="/envelopes" element={<EnveLopesList />} />
               <Route path="/brochures" element={<BrochuresAdmin />} />
               <Route path="/registers" element={<RegistersAdmin />} />
+              <Route path="/booklets" element={<BookletsAdmin />} />
+              <Route path="/printedfiles" element={<PrintedFilesAdmin />} />
+
+
 
 
 

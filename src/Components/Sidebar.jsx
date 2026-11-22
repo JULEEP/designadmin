@@ -118,6 +118,20 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
       dropdown: [{ name: "Manage Registers", path: "/registers" }],
     },
 
+    // ✅ BOOKLETS SECTION
+    {
+      icon: <i className="ri-book-open-line text-xl"></i>,
+      name: "Booklets",
+      dropdown: [{ name: "Manage Booklets", path: "/booklets" }],
+    },
+
+    // ✅ PRINTED FILES SECTION
+    {
+      icon: <i className="ri-folder-open-line text-xl"></i>,
+      name: "Printed Files",
+      dropdown: [{ name: "Manage Printed Files", path: "/printedfiles" }],
+    },
+
     {
       icon: <i className="ri-file-text-line text-xl"></i>,
       name: "Bill Books",

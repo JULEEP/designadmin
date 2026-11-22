@@ -106,9 +106,10 @@ import DeliveryBoy from "./Pages/DeliveryBoy.js";
 import Business from "./Pages/Business.js";
 import StickersList from "./Pages/StickersList.js";
 import DocumentsList from "./Pages/DocumentsList.js";
-
-
-
+import LetterheadsList from "./Pages/LetterheadsAdmin.js";
+import EnveLopesList from "./Pages/EnvelopesAdmin.js";
+import BrochuresAdmin from "./Pages/BrochuresAdmin.js";
+import RegistersAdmin from "./Pages/RegistersAdmin.js";
 
 function App() {
   return (
@@ -226,6 +227,10 @@ function App() {
               <Route path="/business" element={<Business />} />
               <Route path="/stickers" element={<StickersList />} />
               <Route path="/documents" element={<DocumentsList />} />
+              <Route path="/letterheads" element={<LetterheadsList />} />
+              <Route path="/envelopes" element={<EnveLopesList />} />
+              <Route path="/brochures" element={<BrochuresAdmin />} />
+              <Route path="/registers" element={<RegistersAdmin />} />
 
 
 

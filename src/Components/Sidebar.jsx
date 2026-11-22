@@ -88,6 +88,36 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
       ],
     },
 
+
+    // ✅ NEW LETTERHEADS SECTION  ← ADD THIS
+    {
+      icon: <i className="ri-file-paper-2-line text-xl"></i>,
+      name: "Letterheads",
+      dropdown: [{ name: "Manage Letterheads", path: "/letterheads" }],
+    },
+
+    // ✅ ENVELOPES SECTION
+    {
+      icon: <i className="ri-mail-send-line text-xl"></i>,
+      name: "Envelopes",
+      dropdown: [{ name: "Manage Envelopes", path: "/envelopes" }],
+    },
+
+
+    // ✅ BROCHURES SECTION
+    {
+      icon: <i className="ri-booklet-line text-xl"></i>,
+      name: "Brochures",
+      dropdown: [{ name: "Manage Brochures", path: "/brochures" }],
+    },
+
+    // ✅ REGISTERS SECTION
+    {
+      icon: <i className="ri-book-2-line text-xl"></i>,
+      name: "Registers",
+      dropdown: [{ name: "Manage Registers", path: "/registers" }],
+    },
+
     {
       icon: <i className="ri-file-text-line text-xl"></i>,
       name: "Bill Books",
@@ -178,15 +208,14 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
       )}
 
       <div
-        className={`fixed md:relative z-50 transition-all duration-300 ease-in-out ${
-          isMobile
-            ? isCollapsed
-              ? "-translate-x-full"
-              : "translate-x-0"
-            : isCollapsed
-              ? "w-20"
-              : "w-72"
-        } h-screen flex flex-col`}
+        className={`fixed md:relative z-50 transition-all duration-300 ease-in-out ${isMobile
+          ? isCollapsed
+            ? "-translate-x-full"
+            : "translate-x-0"
+          : isCollapsed
+            ? "w-20"
+            : "w-72"
+          } h-screen flex flex-col`}
         style={{
           background: "linear-gradient(135deg, #e6f0ff 0%, #d4e4ff 100%)",
           boxShadow: "0 20px 35px -10px rgba(59, 130, 246, 0.2)",
@@ -229,26 +258,23 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
                   <>
                     <button
                       onClick={() => toggleDropdown(item.name)}
-                      className={`w-full flex items-center py-3 px-4 rounded-xl transition-all duration-200 cursor-pointer ${
-                        isDropdownActive(item.dropdown)
-                          ? 'bg-gradient-to-r from-blue-200/80 to-indigo-200/80 border border-blue-300/50 shadow-sm'
-                          : 'hover:bg-blue-100/50'
-                      }`}
+                      className={`w-full flex items-center py-3 px-4 rounded-xl transition-all duration-200 cursor-pointer ${isDropdownActive(item.dropdown)
+                        ? 'bg-gradient-to-r from-blue-200/80 to-indigo-200/80 border border-blue-300/50 shadow-sm'
+                        : 'hover:bg-blue-100/50'
+                        }`}
                     >
                       <span className={`text-xl ${isDropdownActive(item.dropdown) ? 'text-blue-600' : 'text-blue-500/70'}`}>
                         {item.icon}
                       </span>
                       {(!isCollapsed || isMobile) && (
                         <>
-                          <span className={`ml-4 flex-1 text-left font-medium ${
-                            isDropdownActive(item.dropdown) ? 'text-blue-800' : 'text-blue-700/80'
-                          }`}>
+                          <span className={`ml-4 flex-1 text-left font-medium ${isDropdownActive(item.dropdown) ? 'text-blue-800' : 'text-blue-700/80'
+                            }`}>
                             {item.name}
                           </span>
                           <FaChevronDown
-                            className={`text-xs transition-transform duration-200 ${
-                              openDropdown === item.name ? "rotate-180 text-blue-500" : "text-blue-400/60"
-                            }`}
+                            className={`text-xs transition-transform duration-200 ${openDropdown === item.name ? "rotate-180 text-blue-500" : "text-blue-400/60"
+                              }`}
                           />
                         </>
                       )}
@@ -265,20 +291,17 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
                               setOpenDropdown(null);
                               if (isMobile && onToggle) onToggle();
                             }}
-                            className={`flex items-center py-2.5 px-4 text-sm rounded-xl transition-all duration-200 ${
-                              isActive(subItem.path)
-                                ? 'bg-gradient-to-r from-blue-200/80 to-indigo-200/80 border-l-2 border-blue-500'
-                                : 'hover:bg-blue-100/50'
-                            }`}
+                            className={`flex items-center py-2.5 px-4 text-sm rounded-xl transition-all duration-200 ${isActive(subItem.path)
+                              ? 'bg-gradient-to-r from-blue-200/80 to-indigo-200/80 border-l-2 border-blue-500'
+                              : 'hover:bg-blue-100/50'
+                              }`}
                             style={{ textDecoration: 'none' }}
                           >
-                            <div className={`w-1.5 h-1.5 rounded-full mr-3 ${
-                              isActive(subItem.path) ? 'bg-blue-500' : 'bg-blue-300/60'
-                            }`} />
-                            <span className={`text-sm ${
-                              isActive(subItem.path) ? 'text-blue-800 font-medium' : 'text-blue-700/70'
-                            }`}
-                            style={{ textDecoration: 'none' }}>
+                            <div className={`w-1.5 h-1.5 rounded-full mr-3 ${isActive(subItem.path) ? 'bg-blue-500' : 'bg-blue-300/60'
+                              }`} />
+                            <span className={`text-sm ${isActive(subItem.path) ? 'text-blue-800 font-medium' : 'text-blue-700/70'
+                              }`}
+                              style={{ textDecoration: 'none' }}>
                               {subItem.name}
                             </span>
                           </Link>
@@ -293,11 +316,10 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
                       onClick={() => {
                         if (isMobile && onToggle) onToggle();
                       }}
-                      className={`flex items-center py-3 px-4 rounded-xl transition-all duration-200 cursor-pointer ${
-                        isActive(item.path)
-                          ? 'bg-gradient-to-r from-blue-200/80 to-indigo-200/80 border border-blue-300/50 shadow-sm'
-                          : 'hover:bg-blue-100/50'
-                      } ${item.name === 'Logout' ? 'mt-6 border-t border-blue-200/50 pt-4' : ''}`}
+                      className={`flex items-center py-3 px-4 rounded-xl transition-all duration-200 cursor-pointer ${isActive(item.path)
+                        ? 'bg-gradient-to-r from-blue-200/80 to-indigo-200/80 border border-blue-300/50 shadow-sm'
+                        : 'hover:bg-blue-100/50'
+                        } ${item.name === 'Logout' ? 'mt-6 border-t border-blue-200/50 pt-4' : ''}`}
                       style={{ textDecoration: 'none' }}
                     >
                       <span className={`text-xl ${isActive(item.path) ? 'text-blue-600' : 'text-blue-500/70'}`}>
@@ -305,7 +327,7 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
                       </span>
                       {(!isCollapsed || isMobile) && (
                         <span className={`ml-4 ${isActive(item.path) ? 'text-blue-800 font-medium' : 'text-blue-700/80'} ${item.name === 'Logout' ? 'text-red-500' : ''}`}
-                        style={{ textDecoration: 'none' }}>
+                          style={{ textDecoration: 'none' }}>
                           {item.name}
                         </span>
                       )}
@@ -313,9 +335,8 @@ const Sidebar = ({ isCollapsed, isMobile, onToggle }) => {
                   ) : (
                     <button
                       onClick={item.action}
-                      className={`w-full flex items-center py-3 px-4 rounded-xl transition-all duration-200 cursor-pointer hover:bg-blue-100/50 ${
-                        item.name === 'Logout' ? 'mt-6 border-t border-blue-200/50 pt-4' : ''
-                      }`}
+                      className={`w-full flex items-center py-3 px-4 rounded-xl transition-all duration-200 cursor-pointer hover:bg-blue-100/50 ${item.name === 'Logout' ? 'mt-6 border-t border-blue-200/50 pt-4' : ''
+                        }`}
                     >
                       <span className="text-xl text-blue-500/70">
                         {item.icon}
